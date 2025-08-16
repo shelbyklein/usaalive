@@ -1,0 +1,134 @@
+{
+    "name": "CameraControls",
+    "maps": [
+        {
+            "name": "CameraSelection",
+            "id": "a8f6c2d1-3b4e-4f5a-8c9d-1e2f3a4b5c6d",
+            "actions": [
+                {
+                    "name": "SelectCamera1",
+                    "type": "Button",
+                    "id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectCamera2",
+                    "type": "Button",
+                    "id": "2a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectCamera3",
+                    "type": "Button",
+                    "id": "3a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectCamera4",
+                    "type": "Button",
+                    "id": "4a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectCamera5",
+                    "type": "Button",
+                    "id": "5a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectCamera6",
+                    "type": "Button",
+                    "id": "6a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectCamera1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectCamera2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectCamera3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+                    "path": "<Keyboard>/4",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectCamera4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+                    "path": "<Keyboard>/5",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectCamera5",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6b2c3d4e-5f6a-7b8c-9d0e-1f2a3b4c5d6e",
+                    "path": "<Keyboard>/6",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectCamera6",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

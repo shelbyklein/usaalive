@@ -336,7 +336,7 @@ public class NDICameraGridManager : MonoBehaviour
         
         cameraCells.Add(cameraCell);
         
-        Debug.Log($"Created video display object {index + 1} at position {position} with size {size}");
+        // Debug.Log($"Created video display object {index + 1} at position {position} with size {size}");
     }
     
     private Mesh CreateQuadMesh(Vector2 size)
@@ -491,7 +491,7 @@ public class NDICameraGridManager : MonoBehaviour
             {
                 // We're getting texture, reset warning state
                 hasShownFrameSizeWarning = false;
-                Debug.Log($"Display {cell.index + 1}: Receiving video from {cell.ndiReceiver.ndiName}");
+                // Debug.Log($"Display {cell.index + 1}: Receiving video from {cell.ndiReceiver.ndiName}");
             }
         }
     }
