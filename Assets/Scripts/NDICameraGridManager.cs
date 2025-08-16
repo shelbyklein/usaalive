@@ -8,7 +8,7 @@ using System.Collections;
 public class NDICameraGridManager : MonoBehaviour
 {
     [Header("Grid Configuration")]
-    [SerializeField] private int maxCameras = 4;
+    [SerializeField] private int maxCameras = 6;
     [SerializeField] private int gridColumns = 2;
     [SerializeField] private int gridRows = 2;
     
@@ -225,9 +225,29 @@ public class NDICameraGridManager : MonoBehaviour
     
     private void CreateVideoDisplayObjects(int rows, int cols, int sourceCount)
     {
-        // Calculate cell dimensions
-        Vector2 cellSize = new Vector2(displayBounds.x / cols, displayBounds.y / rows);
-        Vector2 startPos = new Vector2(-displayBounds.x / 2f + cellSize.x / 2f, displayBounds.y / 2f - cellSize.y / 2f);
+        // Calculate cell dimensions maintaining 16:9 aspect ratio
+        Vector2 availableSize = new Vector2(displayBounds.x / cols, displayBounds.y / rows);
+        
+        // Calculate actual cell size maintaining 16:9 aspect ratio
+        float targetAspectRatio = 16f / 9f;
+        Vector2 cellSize;
+        
+        if (availableSize.x / availableSize.y > targetAspectRatio)
+        {
+            // Available space is wider than 16:9, constrain by height
+            cellSize.y = availableSize.y * 0.9f; // Add small margin
+            cellSize.x = cellSize.y * targetAspectRatio;
+        }
+        else
+        {
+            // Available space is taller than 16:9, constrain by width
+            cellSize.x = availableSize.x * 0.9f; // Add small margin
+            cellSize.y = cellSize.x / targetAspectRatio;
+        }
+        
+        // Calculate spacing between cells
+        Vector2 cellSpacing = new Vector2(displayBounds.x / cols, displayBounds.y / rows);
+        Vector2 startPos = new Vector2(-displayBounds.x / 2f + cellSpacing.x / 2f, displayBounds.y / 2f - cellSpacing.y / 2f);
         
         int cellIndex = 0;
         for (int row = 0; row < rows && cellIndex < sourceCount; row++)
@@ -235,8 +255,8 @@ public class NDICameraGridManager : MonoBehaviour
             for (int col = 0; col < cols && cellIndex < sourceCount; col++)
             {
                 Vector3 position = new Vector3(
-                    startPos.x + col * cellSize.x,
-                    startPos.y - row * cellSize.y,
+                    startPos.x + col * cellSpacing.x,
+                    startPos.y - row * cellSpacing.y,
                     0f
                 );
                 
@@ -263,9 +283,13 @@ public class NDICameraGridManager : MonoBehaviour
             case 4:
                 rows = 2; cols = 2; // 2x2 grid
                 break;
+            case 5:
+            case 6:
+                rows = 2; cols = 3; // 3x2 grid
+                break;
             default:
-                // For more than 4, still use 2x2 and show first 4
-                rows = 2; cols = 2;
+                // For more than 6, still use 3x2 and show first 6
+                rows = 2; cols = 3;
                 break;
         }
     }

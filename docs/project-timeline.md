@@ -7,13 +7,13 @@ This timeline focuses on building a Minimum Viable Product (MVP) that prioritize
 **Goal**: Basic NDI camera feed display functionality
 
 ### Week 1: Project Setup & NDI Integration
-- [ ] **Day 1-2**: Unity project setup and KlakNDI plugin integration
+- [x] **Day 1-2**: Unity project setup and KlakNDI plugin integration
   - Configure Unity 2022.3.15f1 project settings
   - Import and configure KlakNDI plugin (v2.1.4)
   - Verify NDI functionality with test streams
   - Set up basic scene structure
 
-- [ ] **Day 3-5**: Single Camera Feed Display
+- [x] **Day 3-5**: Single Camera Feed Display
   - Create basic UI using UI Toolkit
   - Implement single NDI receiver component
   - Display single camera feed in Unity UI
@@ -21,13 +21,13 @@ This timeline focuses on building a Minimum Viable Product (MVP) that prioritize
   - Test with actual NDI camera source
 
 ### Week 2: Basic Multiview Foundation
-- [ ] **Day 1-3**: Grid Layout System
+- [x] **Day 1-3**: Grid Layout System
   - Design flexible grid layout component
   - Implement 2x2 grid display (4 cameras max)
   - Create dynamic UI element generation for camera feeds
   - Add basic camera labeling system
 
-- [ ] **Day 4-5**: Camera Management
+- [x] **Day 4-5**: Camera Management
   - Implement camera discovery/connection logic
   - Add camera feed audodetection
   - Basic error handling for disconnected feeds
@@ -45,7 +45,7 @@ This timeline focuses on building a Minimum Viable Product (MVP) that prioritize
   - Basic UI polish and responsiveness
   - Documentation of MVP features
 
-**MVP Deliverable**: Unity application that can display up to 4 NDI camera feeds in a 2x2 grid with basic selection and fullscreen capabilities.
+**MVP Deliverable**: Unity application that can display up to 6 NDI camera feeds in a 3x2 grid with basic selection and fullscreen capabilities.
 
 ---
 
