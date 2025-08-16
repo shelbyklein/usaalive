@@ -1,0 +1,82 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="ptz-control-container" class="ptz-control-container">
+        <!-- PTZ Directional Pad -->
+        <ui:VisualElement name="ptz-directional-pad" class="ptz-directional-pad">
+            <ui:VisualElement name="ptz-row-1" class="ptz-row">
+                <ui:Button text="↖" name="ptz-up-left" class="ptz-button diagonal" />
+                <ui:Button text="↑" name="ptz-up" class="ptz-button cardinal" />
+                <ui:Button text="↗" name="ptz-up-right" class="ptz-button diagonal" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ptz-row-2" class="ptz-row">
+                <ui:Button text="←" name="ptz-left" class="ptz-button cardinal" />
+                <ui:Button text="⏹" name="ptz-stop" class="ptz-button center stop-button" />
+                <ui:Button text="→" name="ptz-right" class="ptz-button cardinal" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ptz-row-3" class="ptz-row">
+                <ui:Button text="↙" name="ptz-down-left" class="ptz-button diagonal" />
+                <ui:Button text="↓" name="ptz-down" class="ptz-button cardinal" />
+                <ui:Button text="↘" name="ptz-down-right" class="ptz-button diagonal" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Speed Controls -->
+        <ui:VisualElement name="speed-controls" class="speed-controls">
+            <ui:VisualElement name="pan-speed-control" class="speed-control">
+                <ui:Label text="Pan Speed" class="speed-label" />
+                <ui:SliderInt name="pan-speed-slider" class="speed-slider" direction="Horizontal" low-value="1" high-value="24" value="12" />
+                <ui:Label text="12" name="pan-speed-value" class="speed-value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="tilt-speed-control" class="speed-control">
+                <ui:Label text="Tilt Speed" class="speed-label" />
+                <ui:SliderInt name="tilt-speed-slider" class="speed-slider" direction="Horizontal" low-value="1" high-value="23" value="12" />
+                <ui:Label text="12" name="tilt-speed-value" class="speed-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Position Controls -->
+        <ui:VisualElement name="position-controls" class="position-controls">
+            <ui:VisualElement name="position-display" class="position-display">
+                <ui:Label text="Position" class="position-label" />
+                <ui:VisualElement name="position-values" class="position-values">
+                    <ui:VisualElement name="pan-position" class="position-value-row">
+                        <ui:Label text="Pan:" class="position-axis-label" />
+                        <ui:Label text="0°" name="pan-position-value" class="position-axis-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="tilt-position" class="position-value-row">
+                        <ui:Label text="Tilt:" class="position-axis-label" />
+                        <ui:Label text="0°" name="tilt-position-value" class="position-axis-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="position-actions" class="position-actions">
+                <ui:Button text="Home" name="home-position-button" class="position-action-button" />
+                <ui:Button text="Reset" name="reset-position-button" class="position-action-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Advanced PTZ Controls -->
+        <ui:VisualElement name="advanced-controls" class="advanced-controls">
+            <ui:Toggle name="continuous-mode-toggle" text="Continuous Mode" class="advanced-toggle" />
+            <ui:Toggle name="position-feedback-toggle" text="Position Feedback" class="advanced-toggle" value="true" />
+            
+            <!-- Goto Position -->
+            <ui:VisualElement name="goto-position" class="goto-position">
+                <ui:Label text="Go To Position" class="goto-label" />
+                <ui:VisualElement name="goto-inputs" class="goto-inputs">
+                    <ui:VisualElement name="goto-pan" class="goto-input-row">
+                        <ui:Label text="Pan:" class="goto-input-label" />
+                        <ui:IntegerField name="goto-pan-field" class="goto-input-field" value="0" />
+                        <ui:Label text="°" class="goto-unit-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="goto-tilt" class="goto-input-row">
+                        <ui:Label text="Tilt:" class="goto-input-label" />
+                        <ui:IntegerField name="goto-tilt-field" class="goto-input-field" value="0" />
+                        <ui:Label text="°" class="goto-unit-label" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button text="Go" name="goto-button" class="goto-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
