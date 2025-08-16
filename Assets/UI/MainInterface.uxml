@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="root" class="main-container">
+        <ui:VisualElement name="header" class="header-bar">
+            <ui:Label text="USAA Live - NDI Camera Controller" display-tooltip-when-elided="true" name="title-label" class="title-text" />
+            <ui:VisualElement name="status-indicators" class="status-container">
+                <ui:Label text="Status: Ready" display-tooltip-when-elided="true" name="connection-status" class="status-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="main-content" class="content-area">
+            <ui:VisualElement name="camera-display" class="camera-display-area">
+                <!-- Grid will be dynamically populated by NDICameraGridManager -->
+            </ui:VisualElement>
+            
+            <ui:VisualElement name="control-panel" class="control-panel">
+                <ui:Label text="Camera Controls" display-tooltip-when-elided="true" class="panel-title" />
+                <ui:VisualElement name="connection-controls" class="control-section">
+                    <ui:Button text="Connect NDI Source" display-tooltip-when-elided="true" name="connect-btn" class="control-button primary" />
+                    <ui:Button text="Disconnect" display-tooltip-when-elided="true" name="disconnect-btn" class="control-button secondary" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <ui:VisualElement name="footer" class="footer-bar">
+            <ui:Label text="Ready" display-tooltip-when-elided="true" name="status-message" class="status-message" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

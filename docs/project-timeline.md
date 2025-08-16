@@ -29,7 +29,7 @@ This timeline focuses on building a Minimum Viable Product (MVP) that prioritize
 
 - [ ] **Day 4-5**: Camera Management
   - Implement camera discovery/connection logic
-  - Add camera feed add/remove functionality
+  - Add camera feed audodetection
   - Basic error handling for disconnected feeds
   - Camera status indicators (connected/disconnected)
 

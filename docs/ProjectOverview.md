@@ -124,3 +124,6 @@ The application implements the complete VISCA command set with:
 8. Test with actual VISCA-compatible IP cameras and multiple NDI sources
 9. Optimize performance for multiple simultaneous video streams
 10. Add advanced multiview features (labels, status indicators, custom layouts)
+
+## Resources
+1. https://github.com/keijiro/KlakNDI - KlakNDI instructions
