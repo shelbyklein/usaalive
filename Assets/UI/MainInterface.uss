@@ -39,16 +39,17 @@
     flex-grow: 1;
     flex-direction: row;
     padding: 10px;
+    justify-content: flex-end; /* Push control panel to the right when camera area is hidden */
 }
 
 /* Camera Display Area */
 .camera-display-area {
     flex-grow: 1;
     margin-right: 10px;
-    min-height: 400px;
+    min-height: 600px;
     background-color: rgb(16, 16, 16);
     border-radius: 4px;
-    padding: 8px;
+    padding: 2px;
 }
 
 /* Camera Grid Cells */

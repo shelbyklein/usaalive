@@ -19,12 +19,19 @@ public class NDICameraGridManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private UIDocument uiDocument;
     
+    [Header("Video Display")]
+    [SerializeField] private Material videoMaterial;
+    [SerializeField] private Camera displayCamera;
+    
     [Header("NDI Resources")]
     [SerializeField] private NdiResources ndiResources;
     
     private VisualElement gridContainer;
     private List<NDICameraCell> cameraCells = new List<NDICameraCell>();
     private List<string> lastKnownSources = new List<string>();
+    
+    // 2D Display variables
+    private Vector2 displayBounds = new Vector2(16f, 9f); // 16:9 aspect ratio in camera units
     
     private void Start()
     {
@@ -49,7 +56,8 @@ public class NDICameraGridManager : MonoBehaviour
             }
         }
         
-        InitializeUI();
+        InitializeDisplay();
+        // InitializeUI(); // Disabled UI for now to focus on 3D video display
         
         // Immediate NDI source check
         var sources = NdiFinder.sourceNames.ToList();
@@ -60,6 +68,46 @@ public class NDICameraGridManager : MonoBehaviour
         }
         
         StartCoroutine(NDISourceDetectionLoop());
+    }
+    
+    private void InitializeDisplay()
+    {
+        // Setup display camera if not assigned
+        if (displayCamera == null)
+        {
+            displayCamera = Camera.main;
+            if (displayCamera == null)
+            {
+                displayCamera = FindObjectOfType<Camera>();
+            }
+        }
+        
+        // Ensure camera is orthographic for 2D display
+        if (displayCamera != null)
+        {
+            displayCamera.orthographic = true;
+            displayCamera.orthographicSize = displayBounds.y / 2f; // Half height (4.5 units)
+            
+            // Position camera to look at the display objects
+            displayCamera.transform.position = new Vector3(0, 0, -10f);
+            displayCamera.transform.rotation = Quaternion.identity;
+            
+            // Ensure camera clears with a solid color
+            displayCamera.clearFlags = CameraClearFlags.SolidColor;
+            displayCamera.backgroundColor = Color.black;
+            
+            Debug.Log($"Display camera configured: orthographic size = {displayCamera.orthographicSize}, position = {displayCamera.transform.position}");
+        }
+        
+        // Load video material if not assigned
+        if (videoMaterial == null)
+        {
+            videoMaterial = Resources.Load<Material>("NDI_VideoMaterial");
+            if (videoMaterial == null)
+            {
+                Debug.LogWarning("NDI Video Material not found. Video display may not work correctly.");
+            }
+        }
     }
     
     private void InitializeUI()
@@ -115,96 +163,188 @@ public class NDICameraGridManager : MonoBehaviour
     
     private void SetupGridLayout()
     {
-        // Clear existing content
-        gridContainer.Clear();
-        
-        // Create CSS for grid layout
-        gridContainer.style.display = DisplayStyle.Flex;
-        gridContainer.style.flexDirection = FlexDirection.Column;
-        
-        // Create rows
-        for (int row = 0; row < gridRows; row++)
-        {
-            var rowElement = new VisualElement();
-            rowElement.style.flexDirection = FlexDirection.Row;
-            rowElement.style.flexGrow = 1;
-            
-            // Create columns in this row
-            for (int col = 0; col < gridColumns; col++)
-            {
-                int cellIndex = row * gridColumns + col;
-                if (cellIndex >= maxCameras) break;
-                
-                var cellElement = CreateCameraCell(cellIndex);
-                rowElement.Add(cellElement);
-            }
-            
-            gridContainer.Add(rowElement);
-        }
-        
-        Debug.Log($"Grid layout created: {gridRows}x{gridColumns} for {maxCameras} cameras");
+        SetupDynamicGridLayout(0); // Initialize with empty grid
     }
     
-    private VisualElement CreateCameraCell(int index)
+    private void SetupDynamicGridLayout(int sourceCount)
     {
-        var cell = new VisualElement();
-        cell.name = $"camera-cell-{index}";
-        cell.AddToClassList("camera-cell");
+        // Clear existing camera objects and UI
+        ClearExistingDisplayObjects();
         
-        // Style the cell
-        cell.style.flexGrow = 1;
-        cell.style.height = Length.Percent(100);
-        cell.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 1f);
-        cell.style.borderLeftWidth = 1;
-        cell.style.borderRightWidth = 1;
-        cell.style.borderTopWidth = 1;
-        cell.style.borderBottomWidth = 1;
-        cell.style.borderLeftColor = Color.gray;
-        cell.style.borderRightColor = Color.gray;
-        cell.style.borderTopColor = Color.gray;
-        cell.style.borderBottomColor = Color.gray;
-        cell.style.marginLeft = 2;
-        cell.style.marginRight = 2;
-        cell.style.marginTop = 2;
-        cell.style.marginBottom = 2;
+        // Configure grid layout based on source count
+        int rows, cols;
+        GetOptimalGridLayout(sourceCount, out rows, out cols);
         
-        // Create camera content area
-        var contentArea = new VisualElement();
-        contentArea.name = $"camera-content-{index}";
-        contentArea.style.width = Length.Percent(100);
-        contentArea.style.height = Length.Percent(100);
-        contentArea.style.backgroundColor = new Color(0.05f, 0.05f, 0.05f, 1f);
+        if (sourceCount == 0)
+        {
+            // Show empty state in UI only
+            if (gridContainer != null)
+            {
+                var emptyLabel = new Label("No NDI sources detected");
+                emptyLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+                emptyLabel.style.fontSize = 18;
+                emptyLabel.style.color = Color.gray;
+                emptyLabel.style.flexGrow = 1;
+                gridContainer.Add(emptyLabel);
+            }
+            return;
+        }
         
-        // Create label overlay
-        var label = new Label($"Camera {index + 1} - No Signal");
-        label.name = $"camera-label-{index}";
-        label.style.position = Position.Absolute;
-        label.style.top = 10;
-        label.style.left = 10;
-        label.style.backgroundColor = new Color(0, 0, 0, 0.7f);
-        label.style.color = Color.white;
-        label.style.paddingLeft = 8;
-        label.style.paddingRight = 8;
-        label.style.paddingTop = 4;
-        label.style.paddingBottom = 4;
-        label.style.fontSize = 12;
+        // Create 2D GameObjects for video display
+        CreateVideoDisplayObjects(rows, cols, sourceCount);
         
-        cell.Add(contentArea);
-        cell.Add(label);
+        Debug.Log($"Dynamic 2D grid layout created: {rows}x{cols} for {sourceCount} sources");
+    }
+    
+    private void ClearExistingDisplayObjects()
+    {
+        // Clear UI
+        if (gridContainer != null)
+        {
+            gridContainer.Clear();
+        }
+        
+        // Destroy existing GameObjects
+        foreach (var cell in cameraCells)
+        {
+            if (cell.displayGameObject != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(cell.displayGameObject);
+                }
+                else
+                {
+                    DestroyImmediate(cell.displayGameObject);
+                }
+            }
+        }
+        
+        cameraCells.Clear();
+    }
+    
+    private void CreateVideoDisplayObjects(int rows, int cols, int sourceCount)
+    {
+        // Calculate cell dimensions
+        Vector2 cellSize = new Vector2(displayBounds.x / cols, displayBounds.y / rows);
+        Vector2 startPos = new Vector2(-displayBounds.x / 2f + cellSize.x / 2f, displayBounds.y / 2f - cellSize.y / 2f);
+        
+        int cellIndex = 0;
+        for (int row = 0; row < rows && cellIndex < sourceCount; row++)
+        {
+            for (int col = 0; col < cols && cellIndex < sourceCount; col++)
+            {
+                Vector3 position = new Vector3(
+                    startPos.x + col * cellSize.x,
+                    startPos.y - row * cellSize.y,
+                    0f
+                );
+                
+                CreateVideoDisplayObject(cellIndex, position, cellSize);
+                cellIndex++;
+            }
+        }
+    }
+    
+    private void GetOptimalGridLayout(int sourceCount, out int rows, out int cols)
+    {
+        switch (sourceCount)
+        {
+            case 0:
+                rows = 0; cols = 0;
+                break;
+            case 1:
+                rows = 1; cols = 1;
+                break;
+            case 2:
+                rows = 1; cols = 2; // Side by side
+                break;
+            case 3:
+            case 4:
+                rows = 2; cols = 2; // 2x2 grid
+                break;
+            default:
+                // For more than 4, still use 2x2 and show first 4
+                rows = 2; cols = 2;
+                break;
+        }
+    }
+    
+    private void CreateVideoDisplayObject(int index, Vector3 position, Vector2 size)
+    {
+        // Create the main GameObject
+        var displayObj = new GameObject($"NDI_Display_{index + 1}");
+        displayObj.transform.SetParent(transform);
+        displayObj.transform.position = position;
+        
+        // Add MeshFilter with Quad mesh
+        var meshFilter = displayObj.AddComponent<MeshFilter>();
+        meshFilter.mesh = CreateQuadMesh(size);
+        
+        // Add MeshRenderer with video material
+        var meshRenderer = displayObj.AddComponent<MeshRenderer>();
+        if (videoMaterial != null)
+        {
+            meshRenderer.material = new Material(videoMaterial); // Create instance
+            Debug.Log($"Applied material '{videoMaterial.name}' with shader '{videoMaterial.shader.name}' to display object {index + 1}");
+        }
+        else
+        {
+            Debug.LogError("Video material is null! Creating fallback material.");
+            // Create a simple unlit material as fallback
+            var fallbackMaterial = new Material(Shader.Find("Unlit/Texture"));
+            meshRenderer.material = fallbackMaterial;
+        }
+        
+        // Set sorting layer for 2D rendering
+        meshRenderer.sortingLayerName = "Default";
+        meshRenderer.sortingOrder = 0;
         
         // Create NDI camera cell data
         var cameraCell = new NDICameraCell
         {
             index = index,
-            cellElement = cell,
-            contentArea = contentArea,
-            label = label,
+            displayGameObject = displayObj,
+            meshRenderer = meshRenderer,
             ndiReceiver = null,
             isActive = false
         };
         
         cameraCells.Add(cameraCell);
-        return cell;
+        
+        Debug.Log($"Created video display object {index + 1} at position {position} with size {size}");
+    }
+    
+    private Mesh CreateQuadMesh(Vector2 size)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "Video Quad";
+        
+        // Vertices for a quad centered at origin
+        Vector3[] vertices = new Vector3[4];
+        vertices[0] = new Vector3(-size.x / 2, -size.y / 2, 0); // Bottom left
+        vertices[1] = new Vector3(size.x / 2, -size.y / 2, 0);  // Bottom right
+        vertices[2] = new Vector3(-size.x / 2, size.y / 2, 0);  // Top left
+        vertices[3] = new Vector3(size.x / 2, size.y / 2, 0);   // Top right
+        
+        // UV coordinates
+        Vector2[] uv = new Vector2[4];
+        uv[0] = new Vector2(0, 0); // Bottom left
+        uv[1] = new Vector2(1, 0); // Bottom right
+        uv[2] = new Vector2(0, 1); // Top left
+        uv[3] = new Vector2(1, 1); // Top right
+        
+        // Triangles (two triangles make a quad)
+        int[] triangles = new int[6];
+        triangles[0] = 0; triangles[1] = 2; triangles[2] = 1; // First triangle
+        triangles[3] = 2; triangles[4] = 3; triangles[5] = 1; // Second triangle
+        
+        mesh.vertices = vertices;
+        mesh.uv = uv;
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+        
+        return mesh;
     }
     
     private IEnumerator NDISourceDetectionLoop()
@@ -213,86 +353,44 @@ public class NDICameraGridManager : MonoBehaviour
         {
             yield return new WaitForSeconds(2f); // Check every 2 seconds
             
-            Debug.Log("=== NDI SOURCE DETECTION SCAN ===");
-            
             try
             {
                 var currentSources = NdiFinder.sourceNames.ToList();
-                Debug.Log($"[NDI DEBUG] Raw sourceNames enumeration returned {currentSources.Count} items");
-                
-                // Detailed logging of each source
-                for (int i = 0; i < currentSources.Count; i++)
-                {
-                    Debug.Log($"[NDI DEBUG] Source {i}: '{currentSources[i]}' (Length: {currentSources[i]?.Length ?? 0})");
-                }
                 
                 // Check if sources have changed
-                bool sourcesChanged = !currentSources.SequenceEqual(lastKnownSources);
-                Debug.Log($"[NDI DEBUG] Sources changed: {sourcesChanged}");
-                
-                if (sourcesChanged)
+                if (!currentSources.SequenceEqual(lastKnownSources))
                 {
-                    Debug.Log($"[NDI DEBUG] *** NDI SOURCES CHANGED ***");
-                    Debug.Log($"[NDI DEBUG] Previous sources: {string.Join(", ", lastKnownSources)}");
-                    Debug.Log($"[NDI DEBUG] Current sources: {string.Join(", ", currentSources)}");
-                    
                     Debug.Log($"NDI sources changed. Found {currentSources.Count} sources:");
                     foreach (var source in currentSources)
                     {
-                        Debug.Log($"  - '{source}'");
+                        Debug.Log($"  - {source}");
                     }
                     
                     UpdateCameraGrid(currentSources);
                     lastKnownSources = new List<string>(currentSources);
                 }
-                else
-                {
-                    Debug.Log($"[NDI DEBUG] No changes detected. Still {currentSources.Count} sources.");
-                }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[NDI DEBUG] Exception during source detection: {e.Message}");
-                Debug.LogError($"[NDI DEBUG] Stack trace: {e.StackTrace}");
+                Debug.LogError($"Error during NDI source detection: {e.Message}");
             }
-            
-            Debug.Log("=== END NDI SCAN ===");
         }
     }
     
     private void UpdateCameraGrid(List<string> sources)
     {
-        Debug.Log($"[NDI DEBUG] === UPDATING CAMERA GRID ===");
-        Debug.Log($"[NDI DEBUG] Sources to process: {sources.Count}");
-        Debug.Log($"[NDI DEBUG] Available camera cells: {cameraCells.Count}");
-        Debug.Log($"[NDI DEBUG] Max cameras: {maxCameras}");
-        
         // First, clear all existing receivers
         ClearAllReceivers();
         
+        // Clear the current grid and rebuild it based on source count
+        int sourceCount = Mathf.Min(sources.Count, maxCameras);
+        SetupDynamicGridLayout(sourceCount);
+        
         // Assign sources to available camera cells
-        int sourcesToAssign = Mathf.Min(sources.Count, maxCameras);
-        Debug.Log($"[NDI DEBUG] Will assign {sourcesToAssign} sources to cells");
-        
-        int cellIndex = 0;
-        for (int i = 0; i < sources.Count && cellIndex < maxCameras; i++)
+        for (int i = 0; i < sourceCount; i++)
         {
-            Debug.Log($"[NDI DEBUG] Assigning source '{sources[i]}' to cell {cellIndex}");
-            AssignSourceToCell(cellIndex, sources[i]);
-            cellIndex++;
+            AssignSourceToCell(i, sources[i]);
         }
-        
-        // Update remaining cells to show "No Signal"
-        for (int i = cellIndex; i < cameraCells.Count; i++)
-        {
-            Debug.Log($"[NDI DEBUG] Setting cell {i} to 'No Signal'");
-            var cell = cameraCells[i];
-            cell.label.text = $"Camera {i + 1} - No Signal";
-            cell.contentArea.style.backgroundImage = StyleKeyword.None;
-            cell.isActive = false;
-        }
-        
-        Debug.Log($"[NDI DEBUG] === GRID UPDATE COMPLETE ===");
     }
     
     private void ClearAllReceivers()
@@ -301,20 +399,7 @@ public class NDICameraGridManager : MonoBehaviour
         {
             if (cell.ndiReceiver != null)
             {
-                // Clean up target texture
-                if (cell.ndiReceiver.targetTexture != null)
-                {
-                    cell.ndiReceiver.targetTexture.Release();
-                    if (Application.isPlaying)
-                    {
-                        Destroy(cell.ndiReceiver.targetTexture);
-                    }
-                }
-                
-                if (Application.isPlaying)
-                {
-                    Destroy(cell.ndiReceiver.gameObject);
-                }
+                // NDI receiver is on the display GameObject, so we destroy it with the GameObject
                 cell.ndiReceiver = null;
             }
             cell.isActive = false;
@@ -323,112 +408,43 @@ public class NDICameraGridManager : MonoBehaviour
     
     private void AssignSourceToCell(int cellIndex, string sourceName)
     {
-        Debug.Log($"[NDI DEBUG] === ASSIGNING SOURCE TO CELL ===");
-        Debug.Log($"[NDI DEBUG] Cell index: {cellIndex}, Source: '{sourceName}'");
-        
         if (cellIndex >= cameraCells.Count)
         {
-            Debug.LogError($"[NDI DEBUG] Cell index {cellIndex} out of range (max: {cameraCells.Count - 1})");
+            Debug.LogError($"Cell index {cellIndex} out of range (max: {cameraCells.Count - 1})");
             return;
         }
         
         var cell = cameraCells[cellIndex];
-        Debug.Log($"[NDI DEBUG] Got cell {cellIndex}, creating receiver GameObject");
         
-        // Create NDI Receiver GameObject
-        var receiverGO = new GameObject($"NDI_Camera_{cellIndex + 1}");
-        receiverGO.transform.SetParent(transform);
-        Debug.Log($"[NDI DEBUG] Created GameObject: {receiverGO.name}");
-        
-        var receiver = receiverGO.AddComponent<NdiReceiver>();
-        Debug.Log($"[NDI DEBUG] Added NdiReceiver component");
+        // Create NDI Receiver on the display GameObject
+        var receiver = cell.displayGameObject.AddComponent<NdiReceiver>();
         
         if (ndiResources != null)
         {
             receiver.SetResources(ndiResources);
-            Debug.Log($"[NDI DEBUG] Set NDI resources: {ndiResources.name}");
         }
         else
         {
-            Debug.LogWarning($"[NDI DEBUG] NDI Resources is null - receiver may not work properly");
+            Debug.LogWarning($"NDI Resources is null - receiver may not work properly");
         }
         
-        // Create target render texture with fixed resolution
-        var targetTexture = new RenderTexture(targetWidth, targetHeight, 0, RenderTextureFormat.ARGB32);
-        targetTexture.name = $"NDI_Camera_{cellIndex + 1}_Output";
-        receiver.targetTexture = targetTexture;
-        Debug.Log($"[NDI DEBUG] Created target texture: {targetWidth}x{targetHeight}");
-        
+        // Configure receiver to use MeshRenderer instead of RenderTexture
+        receiver.targetRenderer = cell.meshRenderer;
+        receiver.targetMaterialProperty = "_MainTex";
         receiver.ndiName = sourceName;
-        Debug.Log($"[NDI DEBUG] Set receiver NDI name to: '{sourceName}'");
         
         cell.ndiReceiver = receiver;
         cell.isActive = true;
-        cell.label.text = $"Camera {cellIndex + 1} - {sourceName}";
         
-        Debug.Log($"[NDI DEBUG] Successfully assigned NDI source '{sourceName}' to camera cell {cellIndex + 1}");
-        
-        // Start monitoring this receiver for video updates and frame size issues
-        StartCoroutine(MonitorCameraFeed(cell));
+        // Start monitoring for frame size issues
         StartCoroutine(MonitorFrameSizeIssues(cell));
-        Debug.Log($"[NDI DEBUG] Started monitoring coroutines for cell {cellIndex + 1}");
+        
+        Debug.Log($"Assigned NDI source '{sourceName}' to MeshRenderer on display object {cellIndex + 1}");
     }
     
-    private IEnumerator MonitorCameraFeed(NDICameraCell cell)
-    {
-        Debug.Log($"[NDI DEBUG] === STARTING CAMERA FEED MONITORING ===");
-        Debug.Log($"[NDI DEBUG] Monitoring cell {cell.index + 1}");
-        
-        int frameCount = 0;
-        bool hasLoggedTexture = false;
-        
-        while (cell.isActive && cell.ndiReceiver != null)
-        {
-            yield return null; // Wait one frame
-            frameCount++;
-            
-            // Check both the receiver's texture and target texture
-            var activeTexture = cell.ndiReceiver.targetTexture ?? cell.ndiReceiver.texture;
-            
-            if (activeTexture != null)
-            {
-                if (!hasLoggedTexture)
-                {
-                    Debug.Log($"[NDI DEBUG] Cell {cell.index + 1}: Got texture! Size: {activeTexture.width}x{activeTexture.height}");
-                    hasLoggedTexture = true;
-                }
-                
-                // Update the UI with the video feed
-                cell.contentArea.style.backgroundImage = Background.FromRenderTexture(activeTexture);
-                cell.contentArea.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
-                
-                // // Log periodically when we have texture
-                // if (frameCount % 300 == 0) // Every ~5 seconds at 60fps
-                // {
-                //     Debug.Log($"[NDI DEBUG] Cell {cell.index + 1}: Still receiving video ({activeTexture.width}x{activeTexture.height})");
-                // }
-            }
-            else
-            {
-                // No video feed available
-                cell.contentArea.style.backgroundImage = StyleKeyword.None;
-                
-                // Log periodically when we don't have texture
-                if (frameCount % 120 == 0) // Every ~2 seconds at 60fps
-                {
-                    Debug.Log($"[NDI DEBUG] Cell {cell.index + 1}: No texture yet (frame {frameCount})");
-                }
-            }
-        }
-        
-        Debug.Log($"[NDI DEBUG] Stopped monitoring cell {cell.index + 1} (active: {cell.isActive}, receiver: {cell.ndiReceiver != null})");
-    }
     
     private IEnumerator MonitorFrameSizeIssues(NDICameraCell cell)
     {
-        Debug.Log($"[NDI DEBUG] === STARTING FRAME SIZE MONITORING ===");
-        Debug.Log($"[NDI DEBUG] Monitoring frame size issues for cell {cell.index + 1}");
-        
         float lastWarningTime = 0f;
         bool hasShownFrameSizeWarning = false;
         
@@ -442,12 +458,7 @@ public class NDICameraGridManager : MonoBehaviour
                 // If no texture after 5 seconds, assume frame size issue
                 if (Time.time - lastWarningTime > 5f)
                 {
-                    Debug.LogWarning($"[NDI DEBUG] Cell {cell.index + 1}: No video texture - likely frame size incompatibility");
-                    Debug.LogWarning($"[NDI DEBUG] Cell {cell.index + 1}: NDI source may have incompatible resolution (height must be multiple of 8)");
-                    
-                    // Update UI to show incompatibility warning
-                    cell.label.text = $"Camera {cell.index + 1} - Format Error";
-                    
+                    Debug.LogWarning($"Display {cell.index + 1}: No video texture - likely frame size incompatibility");
                     hasShownFrameSizeWarning = true;
                     lastWarningTime = Time.time;
                 }
@@ -456,12 +467,9 @@ public class NDICameraGridManager : MonoBehaviour
             {
                 // We're getting texture, reset warning state
                 hasShownFrameSizeWarning = false;
-                var sourceName = cell.ndiReceiver.ndiName;
-                cell.label.text = $"Camera {cell.index + 1} - {sourceName}";
+                Debug.Log($"Display {cell.index + 1}: Receiving video from {cell.ndiReceiver.ndiName}");
             }
         }
-        
-        Debug.Log($"[NDI DEBUG] Stopped frame size monitoring for cell {cell.index + 1}");
     }
     
     private void OnDestroy()
@@ -474,9 +482,8 @@ public class NDICameraGridManager : MonoBehaviour
 public class NDICameraCell
 {
     public int index;
-    public VisualElement cellElement;
-    public VisualElement contentArea;
-    public Label label;
+    public GameObject displayGameObject;
+    public MeshRenderer meshRenderer;
     public NdiReceiver ndiReceiver;
     public bool isActive;
 }

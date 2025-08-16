@@ -8,8 +8,9 @@
         </ui:VisualElement>
         
         <ui:VisualElement name="main-content" class="content-area">
-            <ui:VisualElement name="camera-display" class="camera-display-area">
-                <!-- Grid will be dynamically populated by NDICameraGridManager -->
+            <ui:VisualElement name="camera-display" class="camera-display-area" style="display: none;">
+                <!-- 3D MeshRenderer objects are now displayed directly in world space -->
+                <!-- This UI area is hidden since we're using 3D GameObjects -->
             </ui:VisualElement>
             
             <ui:VisualElement name="control-panel" class="control-panel">
