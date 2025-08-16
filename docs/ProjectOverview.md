@@ -5,6 +5,15 @@ USAALive is a Unity-based application designed to control IP cameras that use th
 
 ## Core Features
 
+### Multiview Display System
+- **Grid-Based Layout**: Configurable 2x2, 3x3, 4x4, and custom grid arrangements
+- **Simultaneous Camera Feeds**: Real-time display of all connected cameras via NDI streams
+- **Active Camera Management**: Visual indicators for selected/active cameras with quick switching
+- **Individual Camera Status**: Per-camera connection status, labels, and health indicators
+- **Preview/Program Mode**: Professional switching workflow with preview and program outputs
+- **Fullscreen Toggle**: Quick switch between grid view and fullscreen single camera
+- **Performance Optimization**: Efficient rendering of multiple video streams with quality scaling
+
 ### Camera Control Capabilities
 - **PTZ (Pan/Tilt/Zoom) Operations**
   - 8-directional movement control (up, down, left, right, diagonals)
@@ -36,10 +45,12 @@ USAALive is a Unity-based application designed to control IP cameras that use th
   - System configuration
 
 ### Technical Integration
-- **NDI Support**: Integration with KlakNDI plugin for network video streaming
+- **NDI Support**: Integration with KlakNDI plugin for network video streaming and multiview display
+- **Multiview Rendering**: Advanced video grid system supporting 4-16+ simultaneous camera feeds
 - **VISCA Protocol**: Full implementation of 161 VISCA commands across 13 categories
 - **Network Communication**: IP-based camera control for remote operation
 - **Unity Platform**: Cross-platform deployment capabilities
+- **Performance Engine**: Optimized rendering pipeline for multiple high-quality video streams
 
 ## VISCA Protocol Implementation
 
@@ -90,23 +101,28 @@ The application implements the complete VISCA command set with:
 
 ### Key Implementation Areas
 1. **VISCA Command Engine**: Core protocol implementation
-2. **UI Controller**: User interface for camera control
-3. **Input Handler**: Unity Input System integration for device control
-4. **Network Layer**: IP communication with cameras
-5. **NDI Integration**: Video streaming capabilities
-6. **Camera Management**: Device discovery and connection handling
+2. **Multiview Display Engine**: Grid-based video rendering and camera feed management
+3. **UI Controller**: User interface for camera control and multiview layout
+4. **Input Handler**: Unity Input System integration for device control
+5. **Network Layer**: IP communication with cameras
+6. **NDI Integration**: Video streaming capabilities and multiview rendering
+7. **Camera Management**: Device discovery, connection handling, and status monitoring
 
 ## Target Use Cases
-- **Live Event Production**: Real-time camera control for broadcasts
-- **Security Operations**: Remote surveillance camera management
-- **Content Creation**: Multi-camera video production setups
-- **Educational/Training**: Camera operation training environments
+- **Live Event Production**: Real-time multi-camera control and monitoring for broadcasts with multiview operator displays
+- **Security Operations**: Comprehensive surveillance with simultaneous camera feed monitoring
+- **Content Creation**: Multi-camera video production with real-time switching and preview capabilities
+- **Educational/Training**: Camera operation training with visual feedback from multiple camera perspectives
+- **Studio Production**: Professional broadcasting environments requiring multiview monitoring and camera selection
 
 ## Next Steps for Development
 1. Implement core VISCA command communication
-2. Design and build controller UI interface
-3. Integrate NDI plugin for video streaming
-4. Add camera discovery and connection management
-5. Implement error handling and response processing
-6. Test with actual VISCA-compatible IP cameras
-7. Optimize for performance and reliability
+2. Design and build multiview display system with grid layouts
+3. Create controller UI interface with multiview integration
+4. Integrate NDI plugin for video streaming and multiview rendering
+5. Add camera discovery and connection management
+6. Implement camera switching and preview/program workflow
+7. Implement error handling and response processing
+8. Test with actual VISCA-compatible IP cameras and multiple NDI sources
+9. Optimize performance for multiple simultaneous video streams
+10. Add advanced multiview features (labels, status indicators, custom layouts)
