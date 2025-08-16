@@ -6,11 +6,10 @@ USAALive is a Unity-based application designed to control IP cameras that use th
 ## Core Features
 
 ### Multiview Display System
-- **Grid-Based Layout**: Configurable 2x2, 3x3, 4x4, and custom grid arrangements
+- **Grid-Based Layout**: Configurable grid arrangements
 - **Simultaneous Camera Feeds**: Real-time display of all connected cameras via NDI streams
 - **Active Camera Management**: Visual indicators for selected/active cameras with quick switching
 - **Individual Camera Status**: Per-camera connection status, labels, and health indicators
-- **Preview/Program Mode**: Professional switching workflow with preview and program outputs
 - **Fullscreen Toggle**: Quick switch between grid view and fullscreen single camera
 - **Performance Optimization**: Efficient rendering of multiple video streams with quality scaling
 
@@ -38,11 +37,10 @@ USAALive is a Unity-based application designed to control IP cameras that use th
   - White Balance settings (Indoor, Outdoor, ATW, Manual, One Push)
   - Iris, Shutter, and Gain control
   - Brightness and color adjustments (R/B Gain)
+  - gracefull transitions while changing from setting to setting
 
 - **Camera Management**
-  - Power control
   - Memory preset storage and recall
-  - System configuration
 
 ### Technical Integration
 - **NDI Support**: Integration with KlakNDI plugin for network video streaming and multiview display
