@@ -1,0 +1,160 @@
+Function_Type,Category,Action,Command_Packet,Hex_Command,Description,Parameters,Priority
+PTZ_Movement,Pan_TiltDrive,Absolute Position,8x 01 06 02 VV WW 0Y 0Y 0Y 0Y 0Z0Z 0Z 0Z FF,8x 01 06 02 VV WW 0Y 0Y 0Y 0Y 0Z0Z 0Z 0Z FF,,,1
+PTZ_Movement,Pan_TiltDrive,Down,8x 01 06 01 VV WW 03 02 FF,8x 01 06 01 VV WW 03 02 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Downleft,8x 01 06 01 VV WW 01 02 FF,8x 01 06 01 VV WW 01 02 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Downright,8x 01 06 01 VV WW 02 02 FF,8x 01 06 01 VV WW 02 02 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Home,8x 01 06 04 FF,8x 01 06 04 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Left,8x 01 06 01 VV WW 01 03 FF,8x 01 06 01 VV WW 01 03 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Relative Position,8x 01 06 03 VV WW 0Y 0Y 0Y 0Y0Z 0Z 0Z 0Z FF,8x 01 06 03 VV WW 0Y 0Y 0Y 0Y0Z 0Z 0Z 0Z FF,,,1
+PTZ_Movement,Pan_TiltDrive,Reset,8x 01 06 05 FF,8x 01 06 05 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Right,8x 01 06 01 VV WW 02 03 FF,8x 01 06 01 VV WW 02 03 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Stop,8x 01 06 01 VV WW 03 03 FF,8x 01 06 01 VV WW 03 03 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Upleft,8x 01 06 01 VV WW 01 01 FF,8x 01 06 01 VV WW 01 01 FF,,,1
+PTZ_Movement,Pan_TiltDrive,Upright,8x 01 06 01 VV WW 02 01 FF,8x 01 06 01 VV WW 02 01 FF,,,1
+PTZ_Position,Pan Tilt_LimitSet,Clear,8x 01 06 07 01 0W07 0F 0F 0F 07 0F 0F 0F FF,8x 01 06 07 01 0W07 0F 0F 0F 07 0F 0F 0F FF,,,2
+Zoom_Movement,CAM_DZoom,Tele(Variable),81 01 04 06 2p FF,81 01 04 06 2p FF,Enable in separate mode,separate mode,5
+Zoom_Movement,CAM_DZoom,Wide(Variable),81 01 04 06 3p FF,81 01 04 06 3p FF,Enable in separate mode,separate mode,5
+Zoom_Movement,CAM_Zoom,Tele(Standard),8x 01 04 07 02 FF,8x 01 04 07 02 FF,,,5
+Zoom_Movement,CAM_Zoom,Tele(Variable),8x 01 04 07 2p FF,8x 01 04 07 2p FF,p=0(low)~7(high),p=0(low)~7(high),5
+Zoom_Movement,CAM_Zoom,Wide(Standard),8x 01 04 07 03 FF,8x 01 04 07 03 FF,,,5
+Zoom_Movement,CAM_Zoom,Wide(Variable),8x 01 04 07 3p FF,8x 01 04 07 3p FF,,,5
+Zoom_Position,CAM_DZoom,Direct,81 01 04 46 0p 0q 0r 0s FF,81 01 04 46 0p 0q 0r 0s FF,Enable in separate mode,separate mode,6
+Zoom_Position,CAM_Zoom,Direct,8x 01 04 47 0p 0q 0r 0s FF,8x 01 04 47 0p 0q 0r 0s FF,pqrs: Zoom Position (0 (wide)~0x4000(tele)),pqrs: Zoom Position (0 (wide)~0x4000(tele)),6
+Zoom_Position,CAM_Zoom,Direct with speed,8x 0A 04 47 0t 0p 0q 0r 0s FF,8x 0A 04 47 0t 0p 0q 0r 0s FF,t: spd 0~7pqrs: Zoom Position (0(wide)`0x4000(tele)),t: spd 0~7pqrs: Zoom Position (0(wide)`0x4000(tele)),6
+Zoom_Control,CAM_SpeedByZoom,Off,8x 01 06 A0 03 FF,8x 01 06 A0 03 FF,,,7
+Zoom_Control,CAM_Zoom,Separate Mode,81 01 04 36 01 FF,81 01 04 36 01 FF,Separate with optical zoom control,Separate with optical zoom control,7
+Zoom_Control,CAM_ZoomDisplay,Off,8x 01 06 C2 03 FF,8x 01 06 C2 03 FF,,,7
+Focus_Auto,CAM_Focus,Auto Focus,81 01 04 38 02 FF,81 01 04 38 02 FF,,,8
+Focus_Position,CAM_Focus,Direct,8x 01 04 48 0p 0q 0r 0s FF,8x 01 04 48 0p 0q 0r 0s FF,pqrs: Focus Position,pqrs: Focus Position,9
+Focus_Control,CAM_Focus,Far(Standard),8x 01 04 08 02 FF,8x 01 04 08 02 FF,,,10
+Focus_Control,CAM_Focus,Far(Variable),81 01 04 08 2p FF,81 01 04 08 2p FF,p=0 (Low) to 7 (High),p=0 (Low) to 7 (High),10
+Focus_Control,CAM_Focus,Manual Focus,81 01 04 38 03 FF,81 01 04 38 03 FF,,,10
+Focus_Control,CAM_Focus,Near (Variable),81 01 04 08 3p FF,81 01 04 08 3p FF,p=0 (Low) to 7 (High),p=0 (Low) to 7 (High),10
+Focus_Control,CAM_Focus,Near(Standard),8x 01 04 08 03 FF,8x 01 04 08 03 FF,,,10
+Focus_Control,CAM_Focus,One Push AF,8x 01 04 18 01 FF,8x 01 04 18 01 FF,,,10
+Focus_Control,CAM_Focus ModeInq,,y0 50 03 FF,y0 50 03 FF,Manual Focus,ual Focus,10
+Camera_Control,CAM_Memory (preset),Recall,8x 01 04 3F 02 0p FF,8x 01 04 3F 02 0p FF,,,11
+Camera_Control,CAM_Memory (preset),Set,8x 01 04 3F 01 0p FF,8x 01 04 3F 01 0p FF,,,11
+Camera_Control,CAM_MemoryInq,,y0 50 03 FF,y0 50 03 FF,Off,,11
+Camera_Control,CAM_MemoryInq,SYS_MenuModeInq,8x 09 06 06 FF,8x 09 06 06 FF,y0 50 02 FF,y0 50 02 FF,11
+Camera_Control,CAM_Power,Off,8x 01 04 00 03 FF,8x 01 04 00 03 FF,,,11
+Camera_Control,CAM_PowerInq,,y0 50 03 FF,y0 50 03 FF,Off (Standby),Standby),11
+Image_Control,CAM_AE,Bright,81 01 04 39 0D FF,81 01 04 39 0D FF,Bright Mode (Manual control),right Mode (Manual control),12
+Image_Control,CAM_AE,Iris Priority,81 01 04 39 0B FF,81 01 04 39 0B FF,Iris Priority Automatic Exposure mode,ris Priority Automatic Exposure mode,12
+Image_Control,CAM_AE,Manual,81 01 04 39 03 FF,81 01 04 39 03 FF,Manual Control mode,ual Control mode,12
+Image_Control,CAM_AE,Shutter Priority,81 01 04 39 0A FF,81 01 04 39 0A FF,Shutter PriorityAutomatic Exposure mode,Shutter PriorityAutomatic Exposure mode,12
+Image_Control,CAM_AEModeInq,,y0 50 03 FF,y0 50 03 FF,Manual,ual,12
+Image_Control,CAM_AEModeInq,,y0 50 0A FF,y0 50 0A FF,Shutter Priority,Shutter Priority,12
+Image_Control,CAM_AEModeInq,,y0 50 0B FF,y0 50 0B FF,Iris Priority,ris Priority,12
+Image_Control,CAM_AEModeInq,,y0 50 0D FF,y0 50 0D FF,Bright,right,12
+Image_Control,CAM_BGain,Direct,8x 01 04 44 00 00 0p 0q FF,8x 01 04 44 00 00 0p 0q FF,pq: BGain (0-0xFF),pq: BGain (0-0xFF),12
+Image_Control,CAM_BGain,Down,8x 01 04 04 03 FF,8x 01 04 04 03 FF,,,12
+Image_Control,CAM_BGain,Up,8x 01 04 04 02 FF,8x 01 04 04 02 FF,,,12
+Image_Control,CAM_Bright,Direct,8x 01 04 4D 00 00 0p 0q FF,8x 01 04 4D 00 00 0p 0q FF,pq: Bright Position (0~0x1B),pq: Bright Position (0~0x1B),12
+Image_Control,CAM_Bright,Down,8x 01 04 0D 03 FF,8x 01 04 0D 03 FF,,,12
+Image_Control,CAM_Bright,Up,8x 01 04 0D 02 FF,8x 01 04 0D 02 FF,,,12
+Image_Control,CAM_Gain,Direct,8x 01 04 0C 00 00 0p 0q FF,8x 01 04 0C 00 00 0p 0q FF,pq: Gain Position (0~0x0E),pq: Gain Position (0~0x0E),12
+Image_Control,CAM_Gain,Down,8x 01 04 0C 03 FF,8x 01 04 0C 03 FF,,,12
+Image_Control,CAM_Gain,Up,8x 01 04 0C 02 FF,8x 01 04 0C 02 FF,,,12
+Image_Control,CAM_Iris,Direct,8x 01 04 4B 00 00 0p 0q FF,8x 01 04 4B 00 00 0p 0q FF,pq: Iris Position (0~0x0D),pq: Iris Position (0~0x0D),12
+Image_Control,CAM_Iris,Down,8x 01 04 0B 03 FF,8x 01 04 0B 03 FF,,,12
+Image_Control,CAM_Iris,Up,8x 01 04 0B 02 FF,8x 01 04 0B 02 FF,,,12
+Image_Control,CAM_RGain,Direct,8x 01 04 43 00 00 0p 0q FF,8x 01 04 43 00 00 0p 0q FF,pq: RGain (0~0xFF),pq: RGain (0~0xFF),12
+Image_Control,CAM_RGain,Down,8x 01 04 03 03 FF,8x 01 04 03 03 FF,,,12
+Image_Control,CAM_RGain,Up,8x 01 04 03 02 FF,8x 01 04 03 02 FF,,,12
+Image_Control,CAM_Shutter,Direct,8x 01 04 4A 00 00 0p 0q FF,8x 01 04 4A 00 00 0p 0q FF,pq: Shutter Position (0~0x15),pq: Shutter Position (0~0x15),12
+Image_Control,CAM_Shutter,Down,8x 01 04 0A 03 FF,8x 01 04 0A 03 FF,,,12
+Image_Control,CAM_Shutter,Up,8x 01 04 0A 02 FF,8x 01 04 0A 02 FF,,,12
+Image_Control,CAM_WB,ATW,8x 01 04 35 04 FF,8x 01 04 35 04 FF,,,12
+Image_Control,CAM_WB,Flourescent,8x 01 04 35 09 FF,8x 01 04 35 09 FF,,,12
+Image_Control,CAM_WB,Indoor,8x 01 04 35 01 FF,8x 01 04 35 01 FF,,,12
+Image_Control,CAM_WB,Manual,8x 01 04 35 05FF,8x 01 04 35 05FF,,,12
+Image_Control,CAM_WB,One Push,8x 01 04 35 03 FF,8x 01 04 35 03 FF,,,12
+Image_Control,CAM_WB,One Push Trigger,8x 01 04 10 05 FF,8x 01 04 10 05 FF,,,12
+Image_Control,CAM_WB,Outdoor,8x 01 04 35 02 FF,8x 01 04 35 02 FF,,,12
+Image_Control,CAM_WB,Sodium lamp,8x 01 04 35 08 FF,8x 01 04 35 08 FF,,,12
+Image_Control,CAM_WBModeInq,,y0 50 01 FF,y0 50 01 FF,Indoor Mode,r Mode,12
+Image_Control,CAM_WBModeInq,,y0 50 02 FF,y0 50 02 FF,Outdoor Mode,utdoor Mode,12
+Image_Control,CAM_WBModeInq,,y0 50 03 FF,y0 50 03 FF,OnePush Mode,Push Mode,12
+Image_Control,CAM_WBModeInq,,y0 50 04 FF,y0 50 04 FF,ATW,TW,12
+Image_Control,CAM_WBModeInq,,y0 50 05 FF,y0 50 05 FF,Manual,ual,12
+System_Response,ACK/Completion Message,ACK,z0 41 FF,z0 41 FF,Returned when the command is accepted,Returned when the command is accepted,13
+System_Response,ACK/Completion Message,Completion,z0 51 FF,z0 51 FF,Returned when the command has been executed,Returned when the command has been executed,13
+System_Response,CAM_Backlight (BLC),Off,8x 01 04 33 03 FF,8x 01 04 33 03 FF,Blacklight Off,t Off,13
+System_Response,Syntax Error,,8x 21 FF,8x 21 FF,,,13
+System_Response,Syntax Error,Broadcast,88 30 01 FF,88 30 01 FF,Address setting,ress setting,13
+System_Response,Syntax Error,Broadcast,88 01 00 01 FF,88 01 00 01 FF,I/F Clear,r,13
+System_Response,Syntax Error,Command Not Executable,z0 61 41 FF,z0 61 41 FF,"Returned when the command cannot be executed due to current conditions. For example, when commands controlling the focus manually are received during auto focus.",Returned when the command cannot be executed due to current conditions. For example,13
+Other,CAM_3DNR,,8x 01 06 35 00 pp FF,8x 01 06 35 00 pp FF,pp: Video Format:1080P60 0x001080P50 0x011080I60 0x021080I50 0x031080P30 0x 041080P25 0x05720P60 0x 06720P50 0x07720P30 0x08720P25 0x091080P5994 0x0E1080I5994 0x0F1080P2997 0x10720P5994 0x13720P2997 0x141080P24 0x111080P2398 0x12,pp: Video Format:1080P60 0x001080P50 0x011080I60 0x021080I50 0x031080P30 0x 041080P25 0x05720P60 0x 06720P50 0x07720P30 0x08720P25 0x091080P5994 0x0E1080I5994 0x0F1080P2997 0x10720P5994 0x13720P2997 0x141080P24 0x111080P2398 0x12,14
+Other,CAM_3DNR,,81 01 04 24 72 0p 0q FF,81 01 04 24 72 0p 0q FF,pp: Video Format:1080P60 0x2e1080P50 0x2f1080I60 0x011080I50 0x041080P30 0x061080P25 0x08720P60 0x09720P50 0x0c720P30 0x0e720P25 0x111080P5994 0x131080I5994 0x021080P2997 0x07720P5994 0x0a720P2997 0x0f1080P24 0x2a1080P2398 0x2b,pp: Video Format:1080P60 0x2e1080P50 0x2f1080I60 0x011080I50 0x041080P30 0x061080P25 0x08720P60 0x09720P50 0x0c720P30 0x0e720P25 0x111080P5994 0x131080I5994 0x021080P2997 0x07720P5994 0x0a720P2997 0x0f1080P24 0x2a1080P2398 0x2b,14
+Other,CAM_3DNR,50Hz,81 01 04 23 01 FF,81 01 04 23 01 FF,,,14
+Other,CAM_3DNR,60Hz,81 01 04 23 02 FF,81 01 04 23 02 FF,,,14
+Other,CAM_3DNR,OFF,81 01 04 23 00 FF,81 01 04 23 00 FF,,,14
+Other,CAM_IDWrite,Brightness Balance OFF,8x 01 04 B7 00 FF,8x 01 04 B7 00 FF,Keep Brightness,p Brightness,14
+Other,CAM_IDWrite,Brightness Balance ON,8x 01 04 B7 01 FF,8x 01 04 B7 01 FF,Don’t Keep Brightness,t Keep Brightness,14
+Other,CAM_IDWrite,Color Adjust OFF,8x 01 04 B6 00 FF,8x 01 04 B6 00 FF,Color adjust off,r adjust off,14
+Other,CAM_IDWrite,Color Adjust ON,8x 01 04 B6 01 FF,8x 01 04 B6 01 FF,Color adjust on,r adjust on,14
+Other,CAM_IDWrite,DHCP off,8x 01 04 AE 00 FF,8x 01 04 AE 00 FF,DHCP off,P off,14
+Other,CAM_IDWrite,DHCP on,8x 01 04 AE 01 FF,8x 01 04 AE 01 FF,DHCP on,P on,14
+Other,CAM_IDWrite,Flare blue,8x 01 04 BA dat FF,8x 01 04 BA dat FF,Flare mode blue value (Default=32),re mode blue value (Default=32),14
+Other,CAM_IDWrite,Flare green,8x 01 04 B9 dat FF,8x 01 04 B9 dat FF,Flare mode green value (Default=32),re mode green value (Default=32),14
+Other,CAM_IDWrite,Flare red,8x 01 04 B8 dat FF,8x 01 04 B8 dat FF,Flare mode red value (Default=32),re mode red value (Default=32),14
+Other,CAM_IDWrite,Gateway set,8x 01 04 AD 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 AD 0p 0q 0r 0s 0m 0n 0x 0y FF,Set gateway to :pq.rs.mn.xy,Set gateway to :pq.rs.mn.xy,14
+Other,CAM_IDWrite,IP Set,8x 01 04 AB 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 AB 0p 0q 0r 0s 0m 0n 0x 0y FF,Set ip to :pq.rs.mn.xy,Set ip to :pq.rs.mn.xy,14
+Other,CAM_IDWrite,Mask,8x 01 04 AC 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 AC 0p 0q 0r 0s 0m 0n 0x 0y FF,Set mask to :pq.rs.mn.xy,Set mask to :pq.rs.mn.xy,14
+Other,CAM_IDWrite,Menu Back,8x 01 06 06 10 FF,8x 01 06 06 10 FF,Menu step back,u step back,14
+Other,CAM_IDWrite,Menu Off,8x 01 06 06 03 FF,8x 01 06 06 03 FF,Turn off menu,Turn off menu,14
+Other,CAM_IDWrite,Menu Ok,8x 01 7E 01 02 00 01 FF,8x 01 7E 01 02 00 01 FF,Menu ok,u ok,14
+Other,CAM_IDWrite,Menu On,8x 01 06 06 02 FF,8x 01 06 06 02 FF,Turn on menu,Turn on menu,14
+Other,CAM_IDWrite,Off,8x 01 7E 01 0A 00 0p FF,8x 01 7E 01 0A 00 0p FF,p: 0: OFF(LED off) 1: (LED green on) 2: (LED red on) 4: (LED blue on),p: 0: OFF(LED off) 1: (LED green on) 2: (LED red on) 4: (LED blue on),14
+Other,CAM_IDWrite,Off,8x 01 06 08 03 FF,8x 01 06 08 03 FF,,,14
+Other,CAM_IDWrite,On,8x 01 06 08 02 FF,8x 01 06 08 02 FF,IR(remote commander)receive ON/OFF,R(remote commander)receive ON/OFF,14
+Other,CAM_IDWrite,On/Off,8x 01 06 08 10 FF,8x 01 06 08 10 FF,,,14
+Other,CAM_IDWrite,Rate,8x 01 04 C2 01 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 C2 01 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrsmnxy: bitrate (0~15360),pqrsmnxy: bitrate (0~15360),14
+Other,CAM_IDWrite,Rate,8x 01 04 C3 01 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 C3 01 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrsmnxy: bitrate (0~15360),pqrsmnxy: bitrate (0~15360),14
+Other,CAM_IDWrite,Resolution,8x 01 04 C2 00 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 C2 00 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrs: Column(x size) mnxy: Line (y size) only support: 1920x1080/1280x720,pqrs: Column(x size) mnxy: Line (y size) only support: 1920x1080/1280x720,14
+Other,CAM_IDWrite,Resolution,8x 01 04 C3 00 0p 0q 0r 0s 0m 0n 0x 0y FF,8x 01 04 C3 00 0p 0q 0r 0s 0m 0n 0x 0y FF,pqrs : Column(x size) mnxy: Line (y size) only support: 1280x720/1024x576/640x360,pqrs : Column(x size) mnxy: Line (y size) only support: 1280x720/1024x576/640x360,14
+Other,CAM_LR_Reverse,Off,8x 01 04 61 03 FF,8x 01 04 61 03 FF,,,14
+Other,CAM_LR_Reverse Inq,,y0 50 03 FF,y0 50 03 FF,Off,,14
+Other,CAM_PictureFlip,Off,8x 01 04 66 03 FF,8x 01 04 66 03 FF,,,14
+Other,CAM_PictureFlipInq,,y0 50 03 FF,y0 50 03 FF,Off,,14
+Other,CAM_RS485Ctl,Off,8x 01 06 A5 03 FF,8x 01 06 A5 03 FF,,,14
+Other,CAM_Sharpness,Direct,8x 01 04 42 00 00 0p 0q FF,8x 01 04 42 00 00 0p 0q FF,pq: Aperture Gain (0~0x0F),pq: Aperture Gain (0~0x0F),14
+Other,CAM_Sharpness,Down,8x 01 04 02 03 FF,8x 01 04 02 03 FF,,,14
+Other,CAM_Sharpness,Up,8x 01 04 02 02 FF,8x 01 04 02 02 FF,,,14
+Other,CAM_VersionInq,,y0 50 03 FF,y0 50 03 FF,Off,,14
+Other,CAM_VersionInq,,y0 50 03 FF,y0 50 03 FF,Off,,14
+Other,CAM_VersionInq,,y0 07 7D 01 04 00 FF,y0 07 7D 01 04 00 FF,Power ON/OFF,Power ON/OFF,14
+Other,CAM_VersionInq,,y0 07 7D 01 04 00 FF,y0 07 7D 01 04 00 FF,Zoom tele/wide,Zoom tele/wide,14
+Other,CAM_VersionInq,,y0 07 7D 01 04 07 FF,y0 07 7D 01 04 07 FF,AF On/Off,,14
+Other,CAM_VersionInq,,y0 07 7D 01 04 33 FF,y0 07 7D 01 04 33 FF,CAM_Backlight,t,14
+Other,CAM_VersionInq,,y0 07 7D 01 04 3F FF,y0 07 7D 01 04 3F FF,CAM_Memory,ry,14
+Other,CAM_VersionInq,,y0 07 7D 01 06 01 FF,y0 07 7D 01 06 01 FF,Pan_tiltDrive,Pan_tiltDrive,14
+Other,CAM_VersionInq,22,88,88,,,14
+Other,CAM_VersionInq,45,0x0288,0x02 88,,,14
+Other,CAM_VersionInq,CT_PANTILT_ABSOLUTE_CONTROL,8x 01 06 02 VV WW 0Y 0Y 0Y 0Y OZ OZ 0Z 0Z F,8x 01 06 02 VV WW 0Y 0Y 0Y 0Y OZ OZ 0Z 0Z F,,,14
+Other,CAM_VersionInq,CT_PANTILT_RELATIVE_CONTROL,8x 01 06 01 pp qq rr ss FF,8x 01 06 01 pp qq rr ss FF,,,14
+Other,CAM_VersionInq,CT_ZOOM_ABSOLUTE_CONTROL,8x 01 04 47 0p 0q 0r 0s FF,8x 01 04 47 0p 0q 0r 0s FF,,,14
+Other,CAM_VersionInq,CT_ZOOM_RELATIVE_CONTROL,8x 01 04 07 pp FF,8x 01 04 07 pp FF,,,14
+Other,CAM_VersionInq,IR_Receive,8x 09 06 08 FF,8x 09 06 08 FF,y0 50 02 FF,y0 50 02 FF,14
+Other,CAM_VersionInq,IR_Transfer,8x 09 06 1A FF,8x 09 06 1A FF,y0 50 02 FF,y0 50 02 FF,14
+Other,CAM_VersionInq,Mainstream ResolutionInq,8x 09 04 C2 00 FF,8x 09 04 C2 00 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,14
+Other,CAM_VersionInq,MainstreamRate Inq,8x 09 04 C2 01 FF,8x 09 04 C2 01 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,14
+Other,CAM_VersionInq,PU_BLACKLIGHT_COMPENSATION_CONTROL,81 01 04 33 02/03 FF,81 01 04 33 02/03 FF,,,14
+Other,CAM_VersionInq,PU_BRIGHTNESS_CONTROL,81 01 04 4d 00 00 0p 0q FF,81 01 04 4d 00 00 0p 0q FF,,,14
+Other,CAM_VersionInq,PU_CONTRAST_CONTROL,81 01 04 A2 00 00 0p 0q FF,81 01 04 A2 00 00 0p 0q FF,,,14
+Other,CAM_VersionInq,PU_GAMMA_CONTROL,8x 01 04 5B 0p FF,8x 01 04 5B 0p FF,,,14
+Other,CAM_VersionInq,PU_POWER_LINE_FREQUENCY_CONTROL,8x 01 04 AA 00/01/02 FF,8x 01 04 AA 00/01/02 FF,,,14
+Other,CAM_VersionInq,PU_SATURATION_CONTROL,81 01 04 A1 00 00 0p 0q FF,81 01 04 A1 00 00 0p 0q FF,,,14
+Other,CAM_VersionInq,PU_SHARPNESS_CONTROL,8x 01 04 42 00 00 0p 0q FF,8x 01 04 42 00 00 0p 0q FF,,,14
+Other,CAM_VersionInq,PU_WHITE_BALANCE_TEMPERATURE_CONTRO L,8x 01 04 35 0X FF,8x 01 04 35 0X FF,,,14
+Other,CAM_VersionInq,Pan-tiltMaxSpeed Inq,8x 09 06 11 FF,8x 09 06 11 FF,y0 50 ww zz FF,y0 50 ww zz FF,14
+Other,CAM_VersionInq,Pan-tiltPosInq,8x 09 06 12 FF,8x 09 06 12 FF,y0 50 0w 0w 0w 0w 0z 0z 0z 0z FF,y0 50 0w 0w 0w 0w 0z 0z 0z 0z FF,14
+Other,CAM_VersionInq,Substream ResolutionInq,8x 09 04 C3 00 FF,8x 09 04 C3 00 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,14
+Other,CAM_VersionInq,SubstreamRateInq,8x 09 04 C3 01 FF,8x 09 04 C3 01 FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,y0 50 0p 0q 0r 0s 0m 0n 0x 0y FF,14
+Other,CAM_VersionInq,TallyInq,8x 09 7E 01 0A FF,8x 09 7E 01 0A FF,y0 50 0p FF,y0 50 0p FF,14
+Other,CAM_VersionInq,VideoSystemInq (AIDA),8x 09 06 23 FF,8x 09 06 23 FF,y0 50 pp FF,y0 50 pp FF,14
+Other,CAM_VersionInq,VideoSystemInq (Sony),8x 09 04 24 72 FF,8x 09 04 24 72 FF,y0 50 0p 0p FF,y0 50 0p 0p FF,14
+Other,CAM_WDR,Direct,8x 01 04 D3 pq FF,8x 01 04 D3 pq FF,pq: ExpComp Position (0~0x6),pq: ExpComp Position (0~0x6),14
+Other,CAM_WDR,Off,8x 01 04 3D 03 FF,8x 01 04 3D 03 FF,,,14
+Other,CAM_WDRModeInq,,y0 50 03 FF,y0 50 03 FF,Off,,14

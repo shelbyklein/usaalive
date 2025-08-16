@@ -1,0 +1,13 @@
+Function_Type,Command_Count,Categories
+Camera_Control,6,CAM_Power; CAM_MemoryInq; CAM_PowerInq; CAM_Memory (preset)
+Focus_Auto,1,CAM_Focus
+Focus_Control,7,CAM_Focus; CAM_Focus ModeInq
+Focus_Position,1,CAM_Focus
+Image_Control,39,CAM_AE; CAM_Shutter; CAM_Bright; CAM_RGain; CAM_Iris; CAM_BGain; CAM_Gain; CAM_WB; CAM_WBModeInq; CAM_AEModeInq
+Other,73,CAM_WDR; CAM_IDWrite; CAM_WDRModeInq; CAM_LR_Reverse Inq; CAM_Sharpness; CAM_PictureFlipInq; CAM_VersionInq; CAM_3DNR; CAM_PictureFlip; CAM_RS485Ctl; CAM_LR_Reverse
+PTZ_Movement,12,Pan_TiltDrive
+PTZ_Position,1,Pan Tilt_LimitSet
+System_Response,7,ACK/Completion Message; CAM_Backlight (BLC); Syntax Error
+Zoom_Control,3,CAM_Zoom; CAM_SpeedByZoom; CAM_ZoomDisplay
+Zoom_Movement,6,CAM_Zoom; CAM_DZoom
+Zoom_Position,3,CAM_Zoom; CAM_DZoom
