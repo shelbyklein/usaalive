@@ -216,9 +216,9 @@ public class PTZInputHandler : MonoBehaviour
         
         // Zoom
         float zoom = 0f;
-        if (Input.GetKey(KeyCode.Plus) || Input.GetKey(KeyCode.Equals))
+        if (Input.GetKey(KeyCode.Plus) || Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.E))
             zoom = 1f;
-        if (Input.GetKey(KeyCode.Minus))
+        if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.Q))
             zoom = -1f;
             
         if (zoom != currentZoom)
