@@ -102,6 +102,18 @@ public class CameraInputManager : MonoBehaviour
         }
         
         int previousCamera = currentlySelectedCamera;
+        
+        // Stop movement on previous camera before switching
+        if (previousCamera >= 0 && previousCamera != cameraIndex)
+        {
+            var viscaController = FindObjectOfType<VISCAController>();
+            if (viscaController != null)
+            {
+                viscaController.StopCameraMovement(previousCamera);
+                Debug.Log($"[INPUT] Stopped all movement on Camera {previousCamera + 1} before switching");
+            }
+        }
+        
         currentlySelectedCamera = cameraIndex;
         
         if (previousCamera != cameraIndex)

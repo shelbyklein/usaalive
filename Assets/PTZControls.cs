@@ -200,8 +200,8 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""Gamepad Triggers"",
-                    ""id"": ""62ffa0b1-c07d-4f78-9ffe-7c7cc319f5d4"",
+                    ""name"": ""1D Axis"",
+                    ""id"": ""35ab52f7-d7cf-4cd4-8d78-be35858392f3"",
                     ""path"": ""1DAxis"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -211,23 +211,23 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 },
                 {
-                    ""name"": ""negative"",
-                    ""id"": ""1728e0bc-4281-4fa5-b3d8-c000ad1488e1"",
-                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""name"": ""positive"",
+                    ""id"": ""4db46a33-4ba5-49ef-888a-1d16e08f58b4"",
+                    ""path"": ""<Gamepad>/rightStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Zoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""positive"",
-                    ""id"": ""45678901-4567-4567-4567-678901234567"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""name"": ""negative"",
+                    ""id"": ""1ee8ef0b-5dec-4833-a8a7-2cb2bb71bd1f"",
+                    ""path"": ""<Gamepad>/rightStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Zoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -293,17 +293,6 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""12345678-1234-1234-1234-345678901234"",
-                    ""path"": ""<Gamepad>/rightStick/x"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Focus"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""23456789-2345-2345-2345-456789012345"",
                     ""path"": ""<Keyboard>/tab"",
                     ""interactions"": """",
@@ -353,6 +342,42 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PanTilt"",
+                    ""type"": ""Value"",
+                    ""id"": ""d1a9efeb-3a28-4936-88ab-1cd88c4e1d95"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""FullScreenToggle"",
+                    ""type"": ""Button"",
+                    ""id"": ""189e27e6-0e5e-45b5-9fe7-2db1a829b081"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SpeedModifier"",
+                    ""type"": ""Button"",
+                    ""id"": ""a1b2c3d4-e5f6-7890-abcd-ef1234567890"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PrecisionModifier"",
+                    ""type"": ""Button"",
+                    ""id"": ""b2c3d4e5-f6a7-8901-bcde-f12345678901"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -375,6 +400,72 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""CycleCameraPrevious"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2f861e49-2588-4fee-afab-106a3a3a934f"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""PanTilt"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""99d3bac8-2327-4a2c-9438-6e05e37e5db6"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FullScreenToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c3d4e5f6-a7b8-9012-cdef-123456789012"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""SpeedModifier"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d4e5f6a7-b8c9-0123-def0-234567890123"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""PrecisionModifier"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e5f6a7b8-c9d0-1234-ef01-345678901234"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""SpeedModifier"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f6a7b8c9-d0e1-2345-f012-456789012345"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""PrecisionModifier"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -432,6 +523,10 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
         m_PTZMovement = asset.FindActionMap("PTZMovement", throwIfNotFound: true);
         m_PTZMovement_CycleCameraNext = m_PTZMovement.FindAction("CycleCameraNext", throwIfNotFound: true);
         m_PTZMovement_CycleCameraPrevious = m_PTZMovement.FindAction("CycleCameraPrevious", throwIfNotFound: true);
+        m_PTZMovement_PanTilt = m_PTZMovement.FindAction("PanTilt", throwIfNotFound: true);
+        m_PTZMovement_FullScreenToggle = m_PTZMovement.FindAction("FullScreenToggle", throwIfNotFound: true);
+        m_PTZMovement_SpeedModifier = m_PTZMovement.FindAction("SpeedModifier", throwIfNotFound: true);
+        m_PTZMovement_PrecisionModifier = m_PTZMovement.FindAction("PrecisionModifier", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -719,12 +814,20 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
     private List<IPTZMovementActions> m_PTZMovementActionsCallbackInterfaces = new List<IPTZMovementActions>();
     private readonly InputAction m_PTZMovement_CycleCameraNext;
     private readonly InputAction m_PTZMovement_CycleCameraPrevious;
+    private readonly InputAction m_PTZMovement_PanTilt;
+    private readonly InputAction m_PTZMovement_FullScreenToggle;
+    private readonly InputAction m_PTZMovement_SpeedModifier;
+    private readonly InputAction m_PTZMovement_PrecisionModifier;
     public struct PTZMovementActions
     {
         private @PTZControls m_Wrapper;
         public PTZMovementActions(@PTZControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @CycleCameraNext => m_Wrapper.m_PTZMovement_CycleCameraNext;
         public InputAction @CycleCameraPrevious => m_Wrapper.m_PTZMovement_CycleCameraPrevious;
+        public InputAction @PanTilt => m_Wrapper.m_PTZMovement_PanTilt;
+        public InputAction @FullScreenToggle => m_Wrapper.m_PTZMovement_FullScreenToggle;
+        public InputAction @SpeedModifier => m_Wrapper.m_PTZMovement_SpeedModifier;
+        public InputAction @PrecisionModifier => m_Wrapper.m_PTZMovement_PrecisionModifier;
         public InputActionMap Get() { return m_Wrapper.m_PTZMovement; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -740,6 +843,18 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
             @CycleCameraPrevious.started += instance.OnCycleCameraPrevious;
             @CycleCameraPrevious.performed += instance.OnCycleCameraPrevious;
             @CycleCameraPrevious.canceled += instance.OnCycleCameraPrevious;
+            @PanTilt.started += instance.OnPanTilt;
+            @PanTilt.performed += instance.OnPanTilt;
+            @PanTilt.canceled += instance.OnPanTilt;
+            @FullScreenToggle.started += instance.OnFullScreenToggle;
+            @FullScreenToggle.performed += instance.OnFullScreenToggle;
+            @FullScreenToggle.canceled += instance.OnFullScreenToggle;
+            @SpeedModifier.started += instance.OnSpeedModifier;
+            @SpeedModifier.performed += instance.OnSpeedModifier;
+            @SpeedModifier.canceled += instance.OnSpeedModifier;
+            @PrecisionModifier.started += instance.OnPrecisionModifier;
+            @PrecisionModifier.performed += instance.OnPrecisionModifier;
+            @PrecisionModifier.canceled += instance.OnPrecisionModifier;
         }
 
         private void UnregisterCallbacks(IPTZMovementActions instance)
@@ -750,6 +865,18 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
             @CycleCameraPrevious.started -= instance.OnCycleCameraPrevious;
             @CycleCameraPrevious.performed -= instance.OnCycleCameraPrevious;
             @CycleCameraPrevious.canceled -= instance.OnCycleCameraPrevious;
+            @PanTilt.started -= instance.OnPanTilt;
+            @PanTilt.performed -= instance.OnPanTilt;
+            @PanTilt.canceled -= instance.OnPanTilt;
+            @FullScreenToggle.started -= instance.OnFullScreenToggle;
+            @FullScreenToggle.performed -= instance.OnFullScreenToggle;
+            @FullScreenToggle.canceled -= instance.OnFullScreenToggle;
+            @SpeedModifier.started -= instance.OnSpeedModifier;
+            @SpeedModifier.performed -= instance.OnSpeedModifier;
+            @SpeedModifier.canceled -= instance.OnSpeedModifier;
+            @PrecisionModifier.started -= instance.OnPrecisionModifier;
+            @PrecisionModifier.performed -= instance.OnPrecisionModifier;
+            @PrecisionModifier.canceled -= instance.OnPrecisionModifier;
         }
 
         public void RemoveCallbacks(IPTZMovementActions instance)
@@ -810,5 +937,9 @@ public partial class @PTZControls: IInputActionCollection2, IDisposable
     {
         void OnCycleCameraNext(InputAction.CallbackContext context);
         void OnCycleCameraPrevious(InputAction.CallbackContext context);
+        void OnPanTilt(InputAction.CallbackContext context);
+        void OnFullScreenToggle(InputAction.CallbackContext context);
+        void OnSpeedModifier(InputAction.CallbackContext context);
+        void OnPrecisionModifier(InputAction.CallbackContext context);
     }
 }

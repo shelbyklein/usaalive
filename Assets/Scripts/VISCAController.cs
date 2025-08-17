@@ -298,6 +298,35 @@ public class VISCAController : MonoBehaviour
         }
     }
 
+    public async void StopCameraMovement(int cameraIndex)
+    {
+        if (cameraIndex < 0 || cameraIndex >= cameraCommunicators.Count)
+        {
+            Debug.LogWarning($"[VISCA] Cannot stop camera {cameraIndex + 1}: Invalid camera index");
+            return;
+        }
+
+        var comm = cameraCommunicators[cameraIndex];
+        if (comm == null)
+        {
+            Debug.LogWarning($"[VISCA] Cannot stop camera {cameraIndex + 1}: Communicator is null");
+            return;
+        }
+
+        try
+        {
+            // Send stop commands for all movement types using the communicator's direct methods
+            await comm.Stop();        // Stop PTZ movement
+            await comm.ZoomStop();    // Stop zoom movement
+            await comm.FocusStop();   // Stop focus movement
+            Debug.Log($"[VISCA] Stopped all movement on Camera {cameraIndex + 1}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[VISCA] Failed to stop Camera {cameraIndex + 1}: {ex.Message}");
+        }
+    }
+
     private VISCAUDPCommunicator GetSelectedCommunicator()
     {
         if (currentlySelectedCamera < 0 || currentlySelectedCamera >= cameraCommunicators.Count)

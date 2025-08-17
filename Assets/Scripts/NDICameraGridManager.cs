@@ -260,16 +260,56 @@ public class NDICameraGridManager : MonoBehaviour
             cellSize.y = cellSize.x / targetAspectRatio;
         }
         
-        // Calculate spacing between cells
-        Vector2 cellSpacing = new Vector2(displayBounds.x / cols, displayBounds.y / rows);
-        Vector2 startPos = new Vector2(-displayBounds.x / 2f + cellSpacing.x / 2f, displayBounds.y / 2f - cellSpacing.y / 2f);
+        // Calculate spacing with 3px padding between cells
+        // Convert 3px to world units (assuming 1 unit ≈ 100px for this camera setup)
+        float paddingWorldUnits = 3f / 100f; // 0.03 world units = 3px
+        
+        // Account for text label space (0.3 units below each cell + some margin)
+        float textLabelSpace = 0.4f; // 0.3f for label + 0.1f margin
+        
+        // Calculate total padding space needed
+        float totalHorizontalPadding = (cols - 1) * paddingWorldUnits; // Padding between columns
+        float totalVerticalPadding = (rows - 1) * paddingWorldUnits + (rows * textLabelSpace);   // Padding between rows + text space
+        
+        // Calculate available space for cells after padding
+        Vector2 availableSpace = new(
+            displayBounds.x - totalHorizontalPadding,
+            displayBounds.y - totalVerticalPadding
+        );
+        
+        // Calculate actual cell size based on available space
+        Vector2 actualCellSize = new(
+            availableSpace.x / cols,
+            availableSpace.y / rows
+        );
+        
+        // Use the smaller dimension to maintain aspect ratio
+        if (actualCellSize.x / targetAspectRatio > actualCellSize.y)
+        {
+            actualCellSize.x = actualCellSize.y * targetAspectRatio;
+        }
+        else
+        {
+            actualCellSize.y = actualCellSize.x / targetAspectRatio;
+        }
+        
+        // Update cellSize to the calculated size
+        cellSize = actualCellSize;
+        
+        // Calculate spacing including cell size + padding
+        Vector2 cellSpacing = new(
+            actualCellSize.x + paddingWorldUnits,
+            actualCellSize.y + paddingWorldUnits + textLabelSpace
+        );
+        
+        Vector2 startPos = new(-displayBounds.x / 2f + cellSpacing.x / 2f, displayBounds.y / 2f - cellSpacing.y / 2f);
         
         int cellIndex = 0;
         for (int row = 0; row < rows && cellIndex < sourceCount; row++)
         {
             for (int col = 0; col < cols && cellIndex < sourceCount; col++)
             {
-                Vector3 position = new Vector3(
+                Vector3 position = new(
                     startPos.x + col * cellSpacing.x,
                     startPos.y - row * cellSpacing.y,
                     0f

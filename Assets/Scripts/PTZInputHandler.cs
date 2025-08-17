@@ -42,6 +42,7 @@ public class PTZInputHandler : MonoBehaviour
     private InputAction autoFocusAction;
     private InputAction cycleCameraNextAction;
     private InputAction cycleCameraPreviousAction;
+    private InputAction fullScreenToggleAction;
     private InputAction[] presetActions;
     
     // State tracking
@@ -51,6 +52,14 @@ public class PTZInputHandler : MonoBehaviour
     private Vector2 currentPanTilt = Vector2.zero;
     private float currentZoom = 0f;
     private float currentFocus = 0f;
+    
+    // Speed tracking for dynamic updates
+    private int lastPanTiltSpeed = -1;
+    private int lastZoomSpeed = -1;
+    private int lastFocusSpeed = -1;
+    private VISCAProtocol.PTZCommand lastPTZCommand = VISCAProtocol.PTZCommand.Stop;
+    private bool lastSpeedModifierState = false;
+    private bool lastPrecisionModifierState = false;
     
     private void Awake()
     {
@@ -126,9 +135,11 @@ public class PTZInputHandler : MonoBehaviour
         stopAllAction = ptzMovementMap?.FindAction("StopAll");
         cycleCameraNextAction = ptzMovementMap?.FindAction("CycleCameraNext");
         cycleCameraPreviousAction = ptzMovementMap?.FindAction("CycleCameraPrevious");
+        fullScreenToggleAction = ptzMovementMap?.FindAction("FullScreenToggle");
         
         Debug.Log($"[PTZ Input] Found actions - PanTilt: {panTiltAction != null}, Home: {homeAction != null}, StopAll: {stopAllAction != null}");
         Debug.Log($"[PTZ Input] Found camera cycling actions - Next: {cycleCameraNextAction != null}, Previous: {cycleCameraPreviousAction != null}");
+        Debug.Log($"[PTZ Input] Found full screen action: {fullScreenToggleAction != null}");
         
         if (panTiltAction != null)
         {
@@ -164,6 +175,16 @@ public class PTZInputHandler : MonoBehaviour
         else
         {
             Debug.LogError("[PTZ Input] CycleCameraPrevious action not found!");
+        }
+        
+        if (fullScreenToggleAction != null)
+        {
+            fullScreenToggleAction.performed += OnFullScreenTogglePerformed;
+            Debug.Log("[PTZ Input] FullScreenToggle action event registered");
+        }
+        else
+        {
+            Debug.LogError("[PTZ Input] FullScreenToggle action not found!");
         }
     }
     
@@ -206,8 +227,10 @@ public class PTZInputHandler : MonoBehaviour
     
     private void SetupModifierActions()
     {
-        speedModifierAction = ptzInputActions.FindAction("SpeedModifier");
-        precisionModifierAction = ptzInputActions.FindAction("PrecisionModifier");
+        speedModifierAction = ptzMovementMap?.FindAction("SpeedModifier");
+        precisionModifierAction = ptzMovementMap?.FindAction("PrecisionModifier");
+        
+        Debug.Log($"[PTZ Input] Speed modifier actions - Speed: {speedModifierAction != null}, Precision: {precisionModifierAction != null}");
     }
     
     private void EnableInputActions()
@@ -226,12 +249,17 @@ public class PTZInputHandler : MonoBehaviour
         // presetControlMap disabled to avoid conflicts with camera selection
     }
     
-    // Keyboard fallback for when no input actions are configured
+    // Update method for continuous monitoring
     private void Update()
     {
-        if (ptzInputActions != null) return; // Use input system if available
+        // Always monitor for speed changes during movement
+        UpdateMovementSpeeds();
         
-        HandleKeyboardInput();
+        // Handle keyboard fallback if no input actions are configured
+        if (ptzInputActions == null)
+        {
+            HandleKeyboardInput();
+        }
     }
     
     private void HandleKeyboardInput()
@@ -360,6 +388,12 @@ public class PTZInputHandler : MonoBehaviour
         HandleCycleCameraPrevious();
     }
     
+    private void OnFullScreenTogglePerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("[PTZ Input] North button (FullScreenToggle) pressed!");
+        HandleFullScreenToggle();
+    }
+    
     private void OnPresetPerformed(int presetNumber)
     {
         HandlePresetCommand(presetNumber);
@@ -377,6 +411,8 @@ public class PTZInputHandler : MonoBehaviour
             {
                 await viscaController.StopPanTilt();
                 isMoving = false;
+                lastPanTiltSpeed = -1;
+                lastPTZCommand = VISCAProtocol.PTZCommand.Stop;
             }
             return;
         }
@@ -389,6 +425,12 @@ public class PTZInputHandler : MonoBehaviour
         {
             await viscaController.MovePanTilt(command, speed, speed);
             isMoving = true;
+            
+            // Store current movement data for dynamic speed updates
+            lastPTZCommand = command;
+            lastPanTiltSpeed = speed;
+            lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+            lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
         }
     }
     
@@ -403,6 +445,7 @@ public class PTZInputHandler : MonoBehaviour
             {
                 await viscaController.ZoomStop();
                 isZooming = false;
+                lastZoomSpeed = -1;
             }
             return;
         }
@@ -419,6 +462,11 @@ public class PTZInputHandler : MonoBehaviour
         }
         
         isZooming = true;
+        
+        // Store current zoom data for dynamic speed updates
+        lastZoomSpeed = speed;
+        lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+        lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
     }
     
     private async void HandleFocusMovement(float input)
@@ -432,6 +480,7 @@ public class PTZInputHandler : MonoBehaviour
             {
                 await viscaController.FocusStop();
                 isFocusing = false;
+                lastFocusSpeed = -1;
             }
             return;
         }
@@ -448,6 +497,11 @@ public class PTZInputHandler : MonoBehaviour
         }
         
         isFocusing = true;
+        
+        // Store current focus data for dynamic speed updates
+        lastFocusSpeed = speed;
+        lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+        lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
     }
     
     // Command Handlers
@@ -468,6 +522,12 @@ public class PTZInputHandler : MonoBehaviour
         isMoving = false;
         isZooming = false;
         isFocusing = false;
+        
+        // Reset speed tracking
+        lastPanTiltSpeed = -1;
+        lastZoomSpeed = -1;
+        lastFocusSpeed = -1;
+        lastPTZCommand = VISCAProtocol.PTZCommand.Stop;
     }
     
     private async void HandleAutoFocusCommand()
@@ -537,6 +597,16 @@ public class PTZInputHandler : MonoBehaviour
             Debug.Log($"[PTZ Input] Cycling to next camera: {currentCamera + 1} → {nextCamera + 1}");
         }
         
+        // Stop movement on current camera before cycling if different from next
+        if (currentCamera >= 0 && currentCamera != nextCamera)
+        {
+            if (viscaController != null)
+            {
+                viscaController.StopCameraMovement(currentCamera);
+                Debug.Log($"[PTZ Input] Stopped Camera {currentCamera + 1} before cycling to {nextCamera + 1}");
+            }
+        }
+        
         // Use the existing camera selection system through reflection or direct method call
         var selectCameraMethod = typeof(CameraInputManager).GetMethod("SelectCamera", 
             BindingFlags.NonPublic | BindingFlags.Instance);
@@ -585,6 +655,16 @@ public class PTZInputHandler : MonoBehaviour
         {
             previousCamera = (currentCamera - 1 + totalCameras) % totalCameras;
             Debug.Log($"[PTZ Input] Cycling to previous camera: {currentCamera + 1} → {previousCamera + 1}");
+        }
+        
+        // Stop movement on current camera before cycling if different from previous
+        if (currentCamera >= 0 && currentCamera != previousCamera)
+        {
+            if (viscaController != null)
+            {
+                viscaController.StopCameraMovement(currentCamera);
+                Debug.Log($"[PTZ Input] Stopped Camera {currentCamera + 1} before cycling to {previousCamera + 1}");
+            }
         }
         
         // Use the existing camera selection system through reflection or direct method call
@@ -647,8 +727,14 @@ public class PTZInputHandler : MonoBehaviour
         bool speedModifier = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
         bool precisionModifier = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
         
-        if (precisionModifier) return slowSpeed;
-        if (speedModifier) return fastSpeed;
+        if (precisionModifier) 
+        {
+            return slowSpeed;
+        }
+        if (speedModifier) 
+        {
+            return fastSpeed;
+        }
         return normalSpeed;
     }
     
@@ -670,6 +756,77 @@ public class PTZInputHandler : MonoBehaviour
         if (precisionModifier) return 1;
         if (speedModifier) return 7;
         return 3;
+    }
+    
+    // Dynamic speed update system
+    private async void UpdateMovementSpeeds()
+    {
+        if (viscaController == null) return;
+        
+        // Check current modifier states
+        bool currentSpeedModifier = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+        bool currentPrecisionModifier = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
+        
+        // Check if modifier states have changed
+        bool modifiersChanged = (currentSpeedModifier != lastSpeedModifierState) || 
+                               (currentPrecisionModifier != lastPrecisionModifierState);
+        
+        if (modifiersChanged)
+        {
+            // Update PTZ movement speed if currently moving
+            if (isMoving && currentPanTilt.magnitude > 0.1f)
+            {
+                int newSpeed = GetCurrentSpeed();
+                if (newSpeed != lastPanTiltSpeed)
+                {
+                    Debug.Log($"[PTZ Input] Speed changed during movement: {lastPanTiltSpeed} → {newSpeed}");
+                    await viscaController.MovePanTilt(lastPTZCommand, newSpeed, newSpeed);
+                    lastPanTiltSpeed = newSpeed;
+                }
+            }
+            
+            // Update zoom speed if currently zooming
+            if (isZooming && Mathf.Abs(currentZoom) > 0.1f)
+            {
+                int newZoomSpeed = GetCurrentZoomSpeed();
+                if (newZoomSpeed != lastZoomSpeed)
+                {
+                    Debug.Log($"[PTZ Input] Zoom speed changed during movement: {lastZoomSpeed} → {newZoomSpeed}");
+                    if (currentZoom > 0)
+                    {
+                        await viscaController.ZoomTele(newZoomSpeed);
+                    }
+                    else
+                    {
+                        await viscaController.ZoomWide(newZoomSpeed);
+                    }
+                    lastZoomSpeed = newZoomSpeed;
+                }
+            }
+            
+            // Update focus speed if currently focusing
+            if (isFocusing && Mathf.Abs(currentFocus) > 0.1f)
+            {
+                int newFocusSpeed = GetCurrentFocusSpeed();
+                if (newFocusSpeed != lastFocusSpeed)
+                {
+                    Debug.Log($"[PTZ Input] Focus speed changed during movement: {lastFocusSpeed} → {newFocusSpeed}");
+                    if (currentFocus > 0)
+                    {
+                        await viscaController.FocusFar(newFocusSpeed);
+                    }
+                    else
+                    {
+                        await viscaController.FocusNear(newFocusSpeed);
+                    }
+                    lastFocusSpeed = newFocusSpeed;
+                }
+            }
+            
+            // Update the stored modifier states
+            lastSpeedModifierState = currentSpeedModifier;
+            lastPrecisionModifierState = currentPrecisionModifier;
+        }
     }
     
     // Public methods for external control
