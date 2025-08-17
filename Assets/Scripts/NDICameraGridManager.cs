@@ -324,6 +324,57 @@ public class NDICameraGridManager : MonoBehaviour
         meshRenderer.sortingLayerName = "Default";
         meshRenderer.sortingOrder = 0;
         
+        // Create border GameObject as sibling, not child
+        var borderObj = new GameObject($"NDI_Border_{index + 1}");
+        borderObj.transform.SetParent(transform); // Same parent as NDICameraGridManager
+        borderObj.transform.position = new Vector3(position.x, position.y, position.z - 0.5f); // World position in front
+        
+        // Add border mesh components
+        var borderMeshFilter = borderObj.AddComponent<MeshFilter>();
+        // Calculate 3px border thickness in Unity units
+        // Assuming camera orthographic size relates to screen pixels
+        var cam = Camera.main;
+        float pixelsToUnits = cam != null && cam.orthographic ? cam.orthographicSize * 2f / Screen.height : 0.01f;
+        float borderThickness = 3f * pixelsToUnits; // 3 pixels converted to Unity units
+        borderMeshFilter.mesh = CreateBorderMesh(size, borderThickness);
+        
+        var borderMeshRenderer = borderObj.AddComponent<MeshRenderer>();
+        
+        // Try multiple shader options for maximum compatibility
+        var borderShader = Shader.Find("Sprites/Default");
+        if (borderShader == null)
+        {
+            borderShader = Shader.Find("Unlit/Color");
+            if (borderShader == null)
+            {
+                borderShader = Shader.Find("Legacy Shaders/Diffuse");
+                Debug.LogWarning("[BORDER] Using fallback Legacy Shaders/Diffuse");
+            }
+        }
+        
+        var borderMaterial = new Material(borderShader);
+        borderMaterial.color = Color.green; // Green border as requested
+        
+        // Set material properties for better visibility
+        borderMaterial.renderQueue = 3001; // Render after transparent objects
+        if (borderMaterial.HasProperty("_ZWrite"))
+            borderMaterial.SetFloat("_ZWrite", 0); // Disable depth writing
+        if (borderMaterial.HasProperty("_Cull"))
+            borderMaterial.SetFloat("_Cull", 0); // Disable culling (show both sides)
+            
+        borderMeshRenderer.material = borderMaterial;
+        
+        // Set border sorting order much higher than video
+        borderMeshRenderer.sortingLayerName = "Default";
+        borderMeshRenderer.sortingOrder = 100; // Much higher priority
+        
+        Debug.Log($"[BORDER DEBUG] Using shader: {borderShader?.name}, Material color: {borderMaterial.color}, RenderQueue: {borderMaterial.renderQueue}");
+        
+        // Start with border hidden
+        borderObj.SetActive(false);
+        
+        Debug.Log($"[BORDER] Created 3px green border for camera {index + 1} at position {borderObj.transform.position}");
+        
         // Create NDI camera cell data
         var cameraCell = new NDICameraCell
         {
@@ -331,7 +382,10 @@ public class NDICameraGridManager : MonoBehaviour
             displayGameObject = displayObj,
             meshRenderer = meshRenderer,
             ndiReceiver = null,
-            isActive = false
+            isActive = false,
+            borderGameObject = borderObj,
+            borderRenderer = borderMeshRenderer,
+            isSelected = false
         };
         
         cameraCells.Add(cameraCell);
@@ -362,6 +416,76 @@ public class NDICameraGridManager : MonoBehaviour
         int[] triangles = new int[6];
         triangles[0] = 0; triangles[1] = 2; triangles[2] = 1; // First triangle
         triangles[3] = 2; triangles[4] = 3; triangles[5] = 1; // Second triangle
+        
+        mesh.vertices = vertices;
+        mesh.uv = uv;
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+        
+        return mesh;
+    }
+    
+    private Mesh CreateBorderMesh(Vector2 size, float borderThickness = 0.05f)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "Border Frame";
+        
+        // Calculate border dimensions
+        Vector2 outerSize = size;
+        Vector2 innerSize = new Vector2(size.x - borderThickness * 2, size.y - borderThickness * 2);
+        
+        // 8 vertices for the border frame (4 outer corners + 4 inner corners)
+        Vector3[] vertices = new Vector3[8];
+        
+        // Outer vertices (clockwise from bottom-left)
+        vertices[0] = new Vector3(-outerSize.x / 2, -outerSize.y / 2, 0); // Outer bottom-left
+        vertices[1] = new Vector3(outerSize.x / 2, -outerSize.y / 2, 0);  // Outer bottom-right
+        vertices[2] = new Vector3(outerSize.x / 2, outerSize.y / 2, 0);   // Outer top-right
+        vertices[3] = new Vector3(-outerSize.x / 2, outerSize.y / 2, 0);  // Outer top-left
+        
+        // Inner vertices (clockwise from bottom-left)
+        vertices[4] = new Vector3(-innerSize.x / 2, -innerSize.y / 2, 0); // Inner bottom-left
+        vertices[5] = new Vector3(innerSize.x / 2, -innerSize.y / 2, 0);  // Inner bottom-right
+        vertices[6] = new Vector3(innerSize.x / 2, innerSize.y / 2, 0);   // Inner top-right
+        vertices[7] = new Vector3(-innerSize.x / 2, innerSize.y / 2, 0);  // Inner top-left
+        
+        // UV coordinates for each vertex
+        Vector2[] uv = new Vector2[8];
+        for (int i = 0; i < 8; i++)
+        {
+            uv[i] = new Vector2(0.5f, 0.5f); // Center UV for solid color
+        }
+        
+        // Triangles to form the border frame (16 triangles total, 4 per side - double sided)
+        int[] triangles = new int[48]; // 16 triangles * 3 vertices each
+        
+        // Bottom border (front face)
+        triangles[0] = 0; triangles[1] = 5; triangles[2] = 1;
+        triangles[3] = 0; triangles[4] = 4; triangles[5] = 5;
+        // Bottom border (back face)  
+        triangles[6] = 0; triangles[7] = 1; triangles[8] = 5;
+        triangles[9] = 0; triangles[10] = 5; triangles[11] = 4;
+        
+        // Right border (front face)
+        triangles[12] = 1; triangles[13] = 6; triangles[14] = 2;
+        triangles[15] = 1; triangles[16] = 5; triangles[17] = 6;
+        // Right border (back face)
+        triangles[18] = 1; triangles[19] = 2; triangles[20] = 6;
+        triangles[21] = 1; triangles[22] = 6; triangles[23] = 5;
+        
+        // Top border (front face)
+        triangles[24] = 2; triangles[25] = 7; triangles[26] = 3;
+        triangles[27] = 2; triangles[28] = 6; triangles[29] = 7;
+        // Top border (back face)
+        triangles[30] = 2; triangles[31] = 3; triangles[32] = 7;
+        triangles[33] = 2; triangles[34] = 7; triangles[35] = 6;
+        
+        // Left border (front face)
+        triangles[36] = 3; triangles[37] = 4; triangles[38] = 0;
+        triangles[39] = 3; triangles[40] = 7; triangles[41] = 4;
+        // Left border (back face)
+        triangles[42] = 3; triangles[43] = 0; triangles[44] = 4;
+        triangles[45] = 3; triangles[46] = 4; triangles[47] = 7;
         
         mesh.vertices = vertices;
         mesh.uv = uv;
@@ -496,6 +620,62 @@ public class NDICameraGridManager : MonoBehaviour
         }
     }
     
+    public void SetCameraSelection(int cameraIndex, bool isSelected)
+    {
+        if (cameraIndex < 0 || cameraIndex >= cameraCells.Count)
+        {
+            Debug.LogWarning($"Camera index {cameraIndex} out of range (0-{cameraCells.Count - 1})");
+            return;
+        }
+        
+        var cell = cameraCells[cameraIndex];
+        cell.isSelected = isSelected;
+        
+        if (cell.borderGameObject != null)
+        {
+            cell.borderGameObject.SetActive(isSelected);
+            var worldPos = cell.borderGameObject.transform.position;
+            var localPos = cell.borderGameObject.transform.localPosition;
+            var scale = cell.borderGameObject.transform.localScale;
+            Debug.Log($"[BORDER] Camera {cameraIndex + 1} border {(isSelected ? "SHOWN" : "HIDDEN")} - World: {worldPos}, Local: {localPos}, Scale: {scale}");
+            
+        }
+        else
+        {
+            Debug.LogWarning($"[BORDER ERROR] Border GameObject is null for camera {cameraIndex + 1}!");
+        }
+    }
+    
+    public void ClearAllSelections()
+    {
+        foreach (var cell in cameraCells)
+        {
+            cell.isSelected = false;
+            if (cell.borderGameObject != null)
+            {
+                cell.borderGameObject.SetActive(false);
+            }
+        }
+        Debug.Log("[BORDER] All camera selections cleared");
+    }
+    
+    public void SetSingleCameraSelection(int cameraIndex)
+    {
+        // Clear all selections first
+        ClearAllSelections();
+        
+        // Set the selected camera
+        if (cameraIndex >= 0 && cameraIndex < cameraCells.Count)
+        {
+            SetCameraSelection(cameraIndex, true);
+        }
+    }
+    
+    public int GetCameraCount()
+    {
+        return cameraCells.Count;
+    }
+    
     private void OnDestroy()
     {
         ClearAllReceivers();
@@ -510,4 +690,7 @@ public class NDICameraCell
     public MeshRenderer meshRenderer;
     public NdiReceiver ndiReceiver;
     public bool isActive;
+    public GameObject borderGameObject;
+    public MeshRenderer borderRenderer;
+    public bool isSelected;
 }

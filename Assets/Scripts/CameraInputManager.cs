@@ -123,10 +123,15 @@ public class CameraInputManager : MonoBehaviour
         Debug.Log($"[CAMERA] Camera {cameraIndex + 1} is now ACTIVE and ready for PTZ control");
         Debug.Log($"[SYSTEM] Selected camera index: {cameraIndex} (0-based), Display: Camera {cameraIndex + 1}");
         
-        // You could add visual feedback here, such as:
-        // - Highlighting the selected camera in the UI
-        // - Updating a "currently selected" indicator
-        // - Enabling/disabling camera-specific controls
+        // Update visual border feedback
+        if (cameraGridManager != null)
+        {
+            cameraGridManager.SetSingleCameraSelection(cameraIndex);
+        }
+        else
+        {
+            Debug.LogWarning("[BORDER] Cannot update camera borders - NDICameraGridManager not found");
+        }
         
         // For future expansion, you might want to:
         // - Send focus to the selected camera
