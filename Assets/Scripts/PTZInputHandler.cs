@@ -155,19 +155,11 @@ public class PTZInputHandler : MonoBehaviour
     
     private void SetupPresetActions()
     {
+        // Preset controls disabled - number keys reserved for camera selection
         if (presetControlMap == null) return;
         
-        presetActions = new InputAction[10]; // Presets 0-9
-        for (int i = 0; i < 10; i++)
-        {
-            int presetNumber = i; // Capture for closure
-            var action = presetControlMap.FindAction($"Preset{i}");
-            if (action != null)
-            {
-                presetActions[i] = action;
-                action.performed += _ => OnPresetPerformed(presetNumber);
-            }
-        }
+        // Skip setting up preset actions to avoid conflicts with camera selection
+        Debug.Log("[PTZ Input] Preset controls disabled - use camera selection keys instead");
     }
     
     private void SetupModifierActions()
@@ -181,7 +173,7 @@ public class PTZInputHandler : MonoBehaviour
         ptzMovementMap?.Enable();
         zoomControlMap?.Enable();
         focusControlMap?.Enable();
-        presetControlMap?.Enable();
+        // presetControlMap disabled to avoid conflicts with camera selection
     }
     
     private void DisableInputActions()
@@ -189,7 +181,7 @@ public class PTZInputHandler : MonoBehaviour
         ptzMovementMap?.Disable();
         zoomControlMap?.Disable();
         focusControlMap?.Disable();
-        presetControlMap?.Disable();
+        // presetControlMap disabled to avoid conflicts with camera selection
     }
     
     // Keyboard fallback for when no input actions are configured
@@ -248,14 +240,7 @@ public class PTZInputHandler : MonoBehaviour
             HandleFocusMovement(focus);
         }
         
-        // Presets (0-9 keys)
-        for (int i = 0; i <= 9; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha0 + i))
-            {
-                HandlePresetCommand(i);
-            }
-        }
+        // Presets removed - number keys now only used for camera selection
         
         // Special commands
         if (Input.GetKeyDown(KeyCode.H))
