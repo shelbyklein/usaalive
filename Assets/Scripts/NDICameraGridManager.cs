@@ -27,7 +27,7 @@ public class NDICameraGridManager : MonoBehaviour
     [SerializeField] private NdiResources ndiResources;
     
     private VisualElement gridContainer;
-    private List<NDICameraCell> cameraCells = new List<NDICameraCell>();
+    public List<NDICameraCell> cameraCells = new List<NDICameraCell>();
     private List<string> lastKnownSources = new List<string>();
     
     // 2D Display variables
@@ -310,6 +310,21 @@ public class NDICameraGridManager : MonoBehaviour
         displayObj.transform.SetParent(transform);
         displayObj.transform.position = position;
         
+        // Create IP label GameObject
+        var labelObj = new GameObject($"IP_Label_{index + 1}");
+        labelObj.transform.SetParent(displayObj.transform);
+        labelObj.transform.localPosition = new Vector3(0, -size.y/2 - 0.3f, -0.1f); // Below the video display
+        
+        // Add TextMesh component for IP display
+        var textMesh = labelObj.AddComponent<TextMesh>();
+        textMesh.text = "Loading..."; // Will be updated when NDI source is assigned
+        textMesh.fontSize = 20;
+        textMesh.color = Color.white;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.characterSize = 0.05f;
+        textMesh.fontStyle = FontStyle.Bold;
+        
         // Add MeshFilter with Quad mesh
         var meshFilter = displayObj.AddComponent<MeshFilter>();
         meshFilter.mesh = CreateQuadMesh(size);
@@ -394,7 +409,8 @@ public class NDICameraGridManager : MonoBehaviour
             isActive = false,
             borderGameObject = borderObj,
             borderRenderer = borderMeshRenderer,
-            isSelected = false
+            isSelected = false,
+            ipLabel = textMesh
         };
         
         cameraCells.Add(cameraCell);
@@ -594,6 +610,19 @@ public class NDICameraGridManager : MonoBehaviour
         cell.ndiReceiver = receiver;
         cell.isActive = true;
         
+        // Extract and display IP address that will be used by VISCA
+        string extractedIP = NDIIPExtractor.ExtractIPFromNDISource(sourceName);
+        if (!string.IsNullOrEmpty(extractedIP) && NDIIPExtractor.IsValidIPAddress(extractedIP))
+        {
+            cell.ipLabel.text = $"Camera {cellIndex + 1}\n{extractedIP}";
+        }
+        else
+        {
+            cell.ipLabel.text = $"Camera {cellIndex + 1}\nNo IP Found";
+        }
+        
+        Debug.Log($"[NDI] Camera {cellIndex + 1} → IP: {extractedIP} from source: {sourceName}");
+        
         // Start monitoring for frame size issues
         StartCoroutine(MonitorFrameSizeIssues(cell));
         
@@ -703,4 +732,5 @@ public class NDICameraCell
     public GameObject borderGameObject;
     public MeshRenderer borderRenderer;
     public bool isSelected;
+    public TextMesh ipLabel;
 }

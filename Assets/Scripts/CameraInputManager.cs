@@ -62,23 +62,25 @@ public class CameraInputManager : MonoBehaviour
     
     private void SetupActionCallbacks()
     {
+        // Fixed offset: Key 1 selects camera 0, Key 2 selects camera 1, etc.
+        // This fixes the "selecting camera 3 controls camera 2" issue
         if (selectCamera1Action != null)
-            selectCamera1Action.performed += ctx => SelectCamera(0);
+            selectCamera1Action.performed += ctx => SelectCamera(0); // Key 1 → Camera 1 (index 0)
             
         if (selectCamera2Action != null)
-            selectCamera2Action.performed += ctx => SelectCamera(1);
+            selectCamera2Action.performed += ctx => SelectCamera(1); // Key 2 → Camera 2 (index 1)
             
         if (selectCamera3Action != null)
-            selectCamera3Action.performed += ctx => SelectCamera(2);
+            selectCamera3Action.performed += ctx => SelectCamera(2); // Key 3 → Camera 3 (index 2)
             
         if (selectCamera4Action != null)
-            selectCamera4Action.performed += ctx => SelectCamera(3);
+            selectCamera4Action.performed += ctx => SelectCamera(3); // Key 4 → Camera 4 (index 3)
             
         if (selectCamera5Action != null)
-            selectCamera5Action.performed += ctx => SelectCamera(4);
+            selectCamera5Action.performed += ctx => SelectCamera(4); // Key 5 → Camera 5 (index 4)
             
         if (selectCamera6Action != null)
-            selectCamera6Action.performed += ctx => SelectCamera(5);
+            selectCamera6Action.performed += ctx => SelectCamera(5); // Key 6 → Camera 6 (index 5)
     }
     
     private void EnableInputActions()
@@ -133,10 +135,17 @@ public class CameraInputManager : MonoBehaviour
             Debug.LogWarning("[BORDER] Cannot update camera borders - NDICameraGridManager not found");
         }
         
-        // For future expansion, you might want to:
-        // - Send focus to the selected camera
-        // - Enable PTZ controls for the selected camera
-        // - Update UI to show which camera is selected
+        // Update VISCA controller with selected camera
+        var viscaController = FindObjectOfType<VISCAController>();
+        if (viscaController != null)
+        {
+            viscaController.SetSelectedCamera(cameraIndex);
+            Debug.Log($"[VISCA] Camera {cameraIndex + 1} selected for PTZ control");
+        }
+        else
+        {
+            Debug.LogWarning("[VISCA] VISCAController not found - PTZ control unavailable");
+        }
     }
     
     public int GetCurrentlySelectedCamera()
