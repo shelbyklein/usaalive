@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Threading.Tasks;
+using System.Reflection;
 
 public class PTZInputHandler : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class PTZInputHandler : MonoBehaviour
     [Header("Input Settings")]
     [SerializeField] private InputActionAsset ptzInputActions;
     [SerializeField] private bool enableKeyboardControls = true;
-    [SerializeField] private bool enableGamepadControls = false;
+    [SerializeField] private bool enableGamepadControls = true;
     
     [Header("Speed Settings")]
     [SerializeField] private int slowSpeed = 3;
@@ -39,6 +40,8 @@ public class PTZInputHandler : MonoBehaviour
     private InputAction stopAllAction;
     private InputAction homeAction;
     private InputAction autoFocusAction;
+    private InputAction cycleCameraNextAction;
+    private InputAction cycleCameraPreviousAction;
     private InputAction[] presetActions;
     
     // State tracking
@@ -78,9 +81,11 @@ public class PTZInputHandler : MonoBehaviour
     {
         if (ptzInputActions == null)
         {
-            Debug.LogError("PTZ Input Actions not assigned!");
+            Debug.LogError("[PTZ Input] PTZ Input Actions not assigned!");
             return;
         }
+        
+        Debug.Log($"[PTZ Input] Initializing with input actions: {ptzInputActions.name}");
         
         // Get action maps
         ptzMovementMap = ptzInputActions.FindActionMap("PTZMovement");
@@ -90,10 +95,12 @@ public class PTZInputHandler : MonoBehaviour
         
         if (ptzMovementMap == null)
         {
-            Debug.LogWarning("PTZMovement action map not found, creating keyboard fallback");
+            Debug.LogWarning("[PTZ Input] PTZMovement action map not found, creating keyboard fallback");
             CreateKeyboardFallback();
             return;
         }
+        
+        Debug.Log("[PTZ Input] Action maps found successfully, setting up actions...");
         
         // Setup actions
         SetupPTZActions();
@@ -101,6 +108,8 @@ public class PTZInputHandler : MonoBehaviour
         SetupFocusActions();
         SetupPresetActions();
         SetupModifierActions();
+        
+        Debug.Log("[PTZ Input] Input actions initialization complete");
     }
     
     private void CreateKeyboardFallback()
@@ -115,6 +124,11 @@ public class PTZInputHandler : MonoBehaviour
         panTiltAction = ptzMovementMap?.FindAction("PanTilt");
         homeAction = ptzMovementMap?.FindAction("Home");
         stopAllAction = ptzMovementMap?.FindAction("StopAll");
+        cycleCameraNextAction = ptzMovementMap?.FindAction("CycleCameraNext");
+        cycleCameraPreviousAction = ptzMovementMap?.FindAction("CycleCameraPrevious");
+        
+        Debug.Log($"[PTZ Input] Found actions - PanTilt: {panTiltAction != null}, Home: {homeAction != null}, StopAll: {stopAllAction != null}");
+        Debug.Log($"[PTZ Input] Found camera cycling actions - Next: {cycleCameraNextAction != null}, Previous: {cycleCameraPreviousAction != null}");
         
         if (panTiltAction != null)
         {
@@ -130,6 +144,26 @@ public class PTZInputHandler : MonoBehaviour
         if (stopAllAction != null)
         {
             stopAllAction.performed += OnStopAllPerformed;
+        }
+        
+        if (cycleCameraNextAction != null)
+        {
+            cycleCameraNextAction.performed += OnCycleCameraNextPerformed;
+            Debug.Log("[PTZ Input] CycleCameraNext action event registered");
+        }
+        else
+        {
+            Debug.LogError("[PTZ Input] CycleCameraNext action not found!");
+        }
+        
+        if (cycleCameraPreviousAction != null)
+        {
+            cycleCameraPreviousAction.performed += OnCycleCameraPreviousPerformed;
+            Debug.Log("[PTZ Input] CycleCameraPrevious action event registered");
+        }
+        else
+        {
+            Debug.LogError("[PTZ Input] CycleCameraPrevious action not found!");
         }
     }
     
@@ -314,6 +348,18 @@ public class PTZInputHandler : MonoBehaviour
         HandleAutoFocusCommand();
     }
     
+    private void OnCycleCameraNextPerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("[PTZ Input] R1 (CycleCameraNext) button pressed!");
+        HandleCycleCameraNext();
+    }
+    
+    private void OnCycleCameraPreviousPerformed(InputAction.CallbackContext context)
+    {
+        Debug.Log("[PTZ Input] L1 (CycleCameraPrevious) button pressed!");
+        HandleCycleCameraPrevious();
+    }
+    
     private void OnPresetPerformed(int presetNumber)
     {
         HandlePresetCommand(presetNumber);
@@ -452,6 +498,106 @@ public class PTZInputHandler : MonoBehaviour
         Debug.Log($"[PTZ Input] Toggling full screen for camera {selectedCameraIndex + 1}");
         
         cameraGridManager.ToggleFullScreen(selectedCameraIndex);
+    }
+    
+    private void HandleCycleCameraNext()
+    {
+        var cameraInputManager = FindObjectOfType<CameraInputManager>();
+        if (cameraInputManager == null)
+        {
+            Debug.LogWarning("[PTZ Input] Camera Input Manager not found - cannot cycle cameras");
+            return;
+        }
+        
+        if (cameraGridManager == null)
+        {
+            Debug.LogWarning("[PTZ Input] Camera Grid Manager not found - cannot cycle cameras");
+            return;
+        }
+        
+        int totalCameras = cameraGridManager.GetCameraCount();
+        if (totalCameras == 0)
+        {
+            Debug.LogWarning("[PTZ Input] No cameras available for cycling");
+            return;
+        }
+        
+        int currentCamera = cameraInputManager.GetCurrentlySelectedCamera();
+        int nextCamera;
+        
+        if (currentCamera < 0)
+        {
+            // No camera currently selected, start with camera 0
+            nextCamera = 0;
+            Debug.Log($"[PTZ Input] No camera selected, selecting first camera: {nextCamera + 1}");
+        }
+        else
+        {
+            nextCamera = (currentCamera + 1) % totalCameras;
+            Debug.Log($"[PTZ Input] Cycling to next camera: {currentCamera + 1} → {nextCamera + 1}");
+        }
+        
+        // Use the existing camera selection system through reflection or direct method call
+        var selectCameraMethod = typeof(CameraInputManager).GetMethod("SelectCamera", 
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (selectCameraMethod != null)
+        {
+            selectCameraMethod.Invoke(cameraInputManager, new object[] { nextCamera });
+        }
+        else
+        {
+            Debug.LogError("[PTZ Input] Could not access SelectCamera method");
+        }
+    }
+    
+    private void HandleCycleCameraPrevious()
+    {
+        var cameraInputManager = FindObjectOfType<CameraInputManager>();
+        if (cameraInputManager == null)
+        {
+            Debug.LogWarning("[PTZ Input] Camera Input Manager not found - cannot cycle cameras");
+            return;
+        }
+        
+        if (cameraGridManager == null)
+        {
+            Debug.LogWarning("[PTZ Input] Camera Grid Manager not found - cannot cycle cameras");
+            return;
+        }
+        
+        int totalCameras = cameraGridManager.GetCameraCount();
+        if (totalCameras == 0)
+        {
+            Debug.LogWarning("[PTZ Input] No cameras available for cycling");
+            return;
+        }
+        
+        int currentCamera = cameraInputManager.GetCurrentlySelectedCamera();
+        int previousCamera;
+        
+        if (currentCamera < 0)
+        {
+            // No camera currently selected, start with last camera
+            previousCamera = totalCameras - 1;
+            Debug.Log($"[PTZ Input] No camera selected, selecting last camera: {previousCamera + 1}");
+        }
+        else
+        {
+            previousCamera = (currentCamera - 1 + totalCameras) % totalCameras;
+            Debug.Log($"[PTZ Input] Cycling to previous camera: {currentCamera + 1} → {previousCamera + 1}");
+        }
+        
+        // Use the existing camera selection system through reflection or direct method call
+        var selectCameraMethod = typeof(CameraInputManager).GetMethod("SelectCamera", 
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        if (selectCameraMethod != null)
+        {
+            selectCameraMethod.Invoke(cameraInputManager, new object[] { previousCamera });
+        }
+        else
+        {
+            Debug.LogError("[PTZ Input] Could not access SelectCamera method");
+        }
     }
     
     private async void HandlePresetCommand(int presetNumber)

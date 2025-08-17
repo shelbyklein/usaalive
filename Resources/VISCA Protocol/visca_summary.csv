@@ -1,3 +1,4 @@
+
 Function_Type,Command_Count,Categories
 Camera_Control,6,CAM_Power; CAM_MemoryInq; CAM_PowerInq; CAM_Memory (preset)
 Focus_Auto,1,CAM_Focus
