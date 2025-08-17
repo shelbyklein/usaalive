@@ -685,6 +685,12 @@ public class NDICameraGridManager : MonoBehaviour
         {
             yield return new WaitForSeconds(1f); // Check every second
             
+            // Recheck if ndiReceiver is still valid after the wait
+            if (cell.ndiReceiver == null)
+            {
+                break; // Exit coroutine if receiver was destroyed
+            }
+            
             // Check if we're getting texture but also getting warnings
             if (cell.ndiReceiver.texture == null && !hasShownFrameSizeWarning)
             {
@@ -696,7 +702,7 @@ public class NDICameraGridManager : MonoBehaviour
                     lastWarningTime = Time.time;
                 }
             }
-            else if (cell.ndiReceiver.texture != null)
+            else if (cell.ndiReceiver != null && cell.ndiReceiver.texture != null)
             {
                 // We're getting texture, reset warning state
                 hasShownFrameSizeWarning = false;

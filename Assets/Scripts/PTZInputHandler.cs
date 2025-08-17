@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Collections;
 
 public class PTZInputHandler : MonoBehaviour
 {
@@ -24,6 +25,11 @@ public class PTZInputHandler : MonoBehaviour
     [Header("Control Behavior")]
     [SerializeField] private bool holdToMove = true; // If false, toggle mode
     [SerializeField] private float repeatCommandInterval = 0.1f;
+    
+    [Header("Analog Speed Settings")]
+    [SerializeField] private float deadzone = 0.2f; // Input below this value is ignored
+    [SerializeField] private int minSpeed = 1; // Minimum movement speed
+    [SerializeField] private int maxSpeed = 15; // Maximum movement speed at full stick deflection
     
     // Input Action Maps
     private InputActionMap ptzMovementMap;
@@ -60,6 +66,11 @@ public class PTZInputHandler : MonoBehaviour
     private VISCAProtocol.PTZCommand lastPTZCommand = VISCAProtocol.PTZCommand.Stop;
     private bool lastSpeedModifierState = false;
     private bool lastPrecisionModifierState = false;
+    
+    // Analog speed tracking
+    private int lastCalculatedPanTiltSpeed = -1;
+    private int lastCalculatedZoomSpeed = -1;
+    private int lastCalculatedFocusSpeed = -1;
     
     private void Awake()
     {
@@ -412,23 +423,32 @@ public class PTZInputHandler : MonoBehaviour
                 await viscaController.StopPanTilt();
                 isMoving = false;
                 lastPanTiltSpeed = -1;
+                lastCalculatedPanTiltSpeed = -1;
                 lastPTZCommand = VISCAProtocol.PTZCommand.Stop;
             }
             return;
         }
         
-        // Determine movement direction
+        // Determine movement direction and calculate speed from analog input
         var command = GetPTZCommandFromInput(input);
-        int speed = GetCurrentSpeed();
+        int speed = CalculateSpeedFromInput(input.magnitude);
         
-        if (command != VISCAProtocol.PTZCommand.Stop)
+        if (command != VISCAProtocol.PTZCommand.Stop && speed > 0)
         {
-            await viscaController.MovePanTilt(command, speed, speed);
+            // Only send command if speed changed significantly or direction changed
+            if (command != lastPTZCommand || Mathf.Abs(speed - lastCalculatedPanTiltSpeed) >= 1)
+            {
+                await viscaController.MovePanTilt(command, speed, speed);
+                lastPanTiltSpeed = speed;
+                lastCalculatedPanTiltSpeed = speed;
+                lastPTZCommand = command;
+                
+                Debug.Log($"[PTZ Analog] Movement: {command}, Speed: {speed} (input: {input.magnitude:F2})");
+            }
+            
             isMoving = true;
             
-            // Store current movement data for dynamic speed updates
-            lastPTZCommand = command;
-            lastPanTiltSpeed = speed;
+            // Store current modifier states for dynamic updates
             lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
             lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
         }
@@ -438,7 +458,9 @@ public class PTZInputHandler : MonoBehaviour
     {
         if (viscaController == null) return;
         
-        if (Mathf.Abs(input) < 0.1f)
+        float inputMagnitude = Mathf.Abs(input);
+        
+        if (inputMagnitude < deadzone)
         {
             // Stop zoom
             if (isZooming)
@@ -446,34 +468,43 @@ public class PTZInputHandler : MonoBehaviour
                 await viscaController.ZoomStop();
                 isZooming = false;
                 lastZoomSpeed = -1;
+                lastCalculatedZoomSpeed = -1;
             }
             return;
         }
         
-        int speed = GetCurrentZoomSpeed();
+        int speed = CalculateSpeedFromInput(inputMagnitude);
         
-        if (input > 0)
+        if (speed > 0)
         {
-            await viscaController.ZoomTele(speed);
+            // Only send command if speed changed significantly
+            if (Mathf.Abs(speed - lastCalculatedZoomSpeed) >= 1)
+            {
+                if (input > 0)
+                    await viscaController.ZoomTele(speed);
+                else
+                    await viscaController.ZoomWide(speed);
+                    
+                lastZoomSpeed = speed;
+                lastCalculatedZoomSpeed = speed;
+                Debug.Log($"[Zoom Analog] Speed: {speed} (input: {inputMagnitude:F2})");
+            }
+            
+            isZooming = true;
+            
+            // Store current modifier states for dynamic updates
+            lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+            lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
         }
-        else
-        {
-            await viscaController.ZoomWide(speed);
-        }
-        
-        isZooming = true;
-        
-        // Store current zoom data for dynamic speed updates
-        lastZoomSpeed = speed;
-        lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
-        lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
     }
     
     private async void HandleFocusMovement(float input)
     {
         if (viscaController == null) return;
         
-        if (Mathf.Abs(input) < 0.1f)
+        float inputMagnitude = Mathf.Abs(input);
+        
+        if (inputMagnitude < deadzone)
         {
             // Stop focus
             if (isFocusing)
@@ -481,27 +512,34 @@ public class PTZInputHandler : MonoBehaviour
                 await viscaController.FocusStop();
                 isFocusing = false;
                 lastFocusSpeed = -1;
+                lastCalculatedFocusSpeed = -1;
             }
             return;
         }
         
-        int speed = GetCurrentFocusSpeed();
+        int speed = CalculateSpeedFromInput(inputMagnitude);
         
-        if (input > 0)
+        if (speed > 0)
         {
-            await viscaController.FocusFar(speed);
+            // Only send command if speed changed significantly
+            if (Mathf.Abs(speed - lastCalculatedFocusSpeed) >= 1)
+            {
+                if (input > 0)
+                    await viscaController.FocusFar(speed);
+                else
+                    await viscaController.FocusNear(speed);
+                    
+                lastFocusSpeed = speed;
+                lastCalculatedFocusSpeed = speed;
+                Debug.Log($"[Focus Analog] Speed: {speed} (input: {inputMagnitude:F2})");
+            }
+            
+            isFocusing = true;
+            
+            // Store current modifier states for dynamic updates
+            lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+            lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
         }
-        else
-        {
-            await viscaController.FocusNear(speed);
-        }
-        
-        isFocusing = true;
-        
-        // Store current focus data for dynamic speed updates
-        lastFocusSpeed = speed;
-        lastSpeedModifierState = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
-        lastPrecisionModifierState = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
     }
     
     // Command Handlers
@@ -527,6 +565,9 @@ public class PTZInputHandler : MonoBehaviour
         lastPanTiltSpeed = -1;
         lastZoomSpeed = -1;
         lastFocusSpeed = -1;
+        lastCalculatedPanTiltSpeed = -1;
+        lastCalculatedZoomSpeed = -1;
+        lastCalculatedFocusSpeed = -1;
         lastPTZCommand = VISCAProtocol.PTZCommand.Stop;
     }
     
@@ -722,41 +763,6 @@ public class PTZInputHandler : MonoBehaviour
         return VISCAProtocol.PTZCommand.Stop;
     }
     
-    private int GetCurrentSpeed()
-    {
-        bool speedModifier = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
-        bool precisionModifier = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
-        
-        if (precisionModifier) 
-        {
-            return slowSpeed;
-        }
-        if (speedModifier) 
-        {
-            return fastSpeed;
-        }
-        return normalSpeed;
-    }
-    
-    private int GetCurrentZoomSpeed()
-    {
-        bool speedModifier = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
-        bool precisionModifier = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
-        
-        if (precisionModifier) return 1;
-        if (speedModifier) return 7;
-        return 4;
-    }
-    
-    private int GetCurrentFocusSpeed()
-    {
-        bool speedModifier = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
-        bool precisionModifier = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
-        
-        if (precisionModifier) return 1;
-        if (speedModifier) return 7;
-        return 3;
-    }
     
     // Dynamic speed update system
     private async void UpdateMovementSpeeds()
@@ -774,52 +780,49 @@ public class PTZInputHandler : MonoBehaviour
         if (modifiersChanged)
         {
             // Update PTZ movement speed if currently moving
-            if (isMoving && currentPanTilt.magnitude > 0.1f)
+            if (isMoving && currentPanTilt.magnitude > deadzone)
             {
-                int newSpeed = GetCurrentSpeed();
-                if (newSpeed != lastPanTiltSpeed)
+                int newSpeed = CalculateSpeedFromInput(currentPanTilt.magnitude);
+                if (newSpeed != lastCalculatedPanTiltSpeed && newSpeed > 0)
                 {
-                    Debug.Log($"[PTZ Input] Speed changed during movement: {lastPanTiltSpeed} → {newSpeed}");
                     await viscaController.MovePanTilt(lastPTZCommand, newSpeed, newSpeed);
                     lastPanTiltSpeed = newSpeed;
+                    lastCalculatedPanTiltSpeed = newSpeed;
+                    Debug.Log($"[PTZ Analog] Speed modifier changed: {newSpeed}");
                 }
             }
             
             // Update zoom speed if currently zooming
-            if (isZooming && Mathf.Abs(currentZoom) > 0.1f)
+            if (isZooming && Mathf.Abs(currentZoom) > deadzone)
             {
-                int newZoomSpeed = GetCurrentZoomSpeed();
-                if (newZoomSpeed != lastZoomSpeed)
+                int newZoomSpeed = CalculateSpeedFromInput(Mathf.Abs(currentZoom));
+                if (newZoomSpeed != lastCalculatedZoomSpeed && newZoomSpeed > 0)
                 {
-                    Debug.Log($"[PTZ Input] Zoom speed changed during movement: {lastZoomSpeed} → {newZoomSpeed}");
                     if (currentZoom > 0)
-                    {
                         await viscaController.ZoomTele(newZoomSpeed);
-                    }
                     else
-                    {
                         await viscaController.ZoomWide(newZoomSpeed);
-                    }
+                        
                     lastZoomSpeed = newZoomSpeed;
+                    lastCalculatedZoomSpeed = newZoomSpeed;
+                    Debug.Log($"[Zoom Analog] Speed modifier changed: {newZoomSpeed}");
                 }
             }
             
             // Update focus speed if currently focusing
-            if (isFocusing && Mathf.Abs(currentFocus) > 0.1f)
+            if (isFocusing && Mathf.Abs(currentFocus) > deadzone)
             {
-                int newFocusSpeed = GetCurrentFocusSpeed();
-                if (newFocusSpeed != lastFocusSpeed)
+                int newFocusSpeed = CalculateSpeedFromInput(Mathf.Abs(currentFocus));
+                if (newFocusSpeed != lastCalculatedFocusSpeed && newFocusSpeed > 0)
                 {
-                    Debug.Log($"[PTZ Input] Focus speed changed during movement: {lastFocusSpeed} → {newFocusSpeed}");
                     if (currentFocus > 0)
-                    {
                         await viscaController.FocusFar(newFocusSpeed);
-                    }
                     else
-                    {
                         await viscaController.FocusNear(newFocusSpeed);
-                    }
+                        
                     lastFocusSpeed = newFocusSpeed;
+                    lastCalculatedFocusSpeed = newFocusSpeed;
+                    Debug.Log($"[Focus Analog] Speed modifier changed: {newFocusSpeed}");
                 }
             }
             
@@ -827,6 +830,32 @@ public class PTZInputHandler : MonoBehaviour
             lastSpeedModifierState = currentSpeedModifier;
             lastPrecisionModifierState = currentPrecisionModifier;
         }
+    }
+    
+    // Analog speed calculation
+    private int CalculateSpeedFromInput(float inputMagnitude)
+    {
+        // Apply deadzone
+        if (inputMagnitude < deadzone)
+            return 0;
+        
+        // Normalize input after deadzone
+        float normalizedInput = (inputMagnitude - deadzone) / (1f - deadzone);
+        normalizedInput = Mathf.Clamp01(normalizedInput);
+        
+        // Map to speed range
+        int baseSpeed = Mathf.RoundToInt(Mathf.Lerp(minSpeed, maxSpeed, normalizedInput));
+        
+        // Apply modifiers
+        bool speedModifier = speedModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftShift);
+        bool precisionModifier = precisionModifierAction?.IsPressed() ?? Input.GetKey(KeyCode.LeftControl);
+        
+        if (precisionModifier)
+            return Mathf.Max(1, baseSpeed / 3); // Divide by 3 for precision
+        if (speedModifier)
+            return Mathf.Min(24, baseSpeed * 2); // Double for speed (cap at VISCA max)
+        
+        return baseSpeed;
     }
     
     // Public methods for external control
