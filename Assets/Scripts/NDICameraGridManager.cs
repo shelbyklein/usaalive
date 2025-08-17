@@ -51,9 +51,18 @@ public class NDICameraGridManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("NDI Resources not found - will try to continue without it");
+                    Debug.LogError("NDI Resources not found - NDI functionality will not work properly!");
+                    Debug.LogError("Please ensure KlakNDI package is properly installed and NDI Resources exist.");
                 }
             }
+            else
+            {
+                Debug.Log($"NDI Resources loaded successfully: {ndiResources.name}");
+            }
+        }
+        else
+        {
+            Debug.Log($"NDI Resources already assigned: {ndiResources.name}");
         }
         
         InitializeDisplay();
@@ -353,7 +362,7 @@ public class NDICameraGridManager : MonoBehaviour
         }
         
         var borderMaterial = new Material(borderShader);
-        borderMaterial.color = Color.green; // Green border as requested
+        borderMaterial.color = Color.red; // Red border
         
         // Set material properties for better visibility
         borderMaterial.renderQueue = 3001; // Render after transparent objects
@@ -373,7 +382,7 @@ public class NDICameraGridManager : MonoBehaviour
         // Start with border hidden
         borderObj.SetActive(false);
         
-        Debug.Log($"[BORDER] Created 3px green border for camera {index + 1} at position {borderObj.transform.position}");
+        Debug.Log($"[BORDER] Created 3px red border for camera {index + 1} at position {borderObj.transform.position}");
         
         // Create NDI camera cell data
         var cameraCell = new NDICameraCell
@@ -564,17 +573,18 @@ public class NDICameraGridManager : MonoBehaviour
         
         var cell = cameraCells[cellIndex];
         
+        // Check if NDI Resources are available before creating receiver
+        if (ndiResources == null)
+        {
+            Debug.LogError($"Cannot assign NDI source '{sourceName}' to camera {cellIndex + 1} - NDI Resources not found!");
+            return;
+        }
+        
         // Create NDI Receiver on the display GameObject
         var receiver = cell.displayGameObject.AddComponent<NdiReceiver>();
+        receiver.SetResources(ndiResources);
         
-        if (ndiResources != null)
-        {
-            receiver.SetResources(ndiResources);
-        }
-        else
-        {
-            Debug.LogWarning($"NDI Resources is null - receiver may not work properly");
-        }
+        Debug.Log($"NDI receiver created for camera {cellIndex + 1} with resources: {ndiResources.name}");
         
         // Configure receiver to use MeshRenderer instead of RenderTexture
         receiver.targetRenderer = cell.meshRenderer;
