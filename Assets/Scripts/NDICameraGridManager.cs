@@ -33,6 +33,12 @@ public class NDICameraGridManager : MonoBehaviour
     // 2D Display variables
     private Vector2 displayBounds = new Vector2(16f, 9f); // 16:9 aspect ratio in camera units
     
+    // Full screen mode variables
+    private bool isFullScreenMode = false;
+    private int fullScreenCameraIndex = -1;
+    private Vector3[] originalPositions;
+    private Vector2[] originalSizes;
+    
     private void Start()
     {
         // Load NDI Resources if not assigned
@@ -713,6 +719,197 @@ public class NDICameraGridManager : MonoBehaviour
     public int GetCameraCount()
     {
         return cameraCells.Count;
+    }
+    
+    public void ToggleFullScreen(int cameraIndex)
+    {
+        if (isFullScreenMode && fullScreenCameraIndex == cameraIndex)
+        {
+            // Exit full screen mode
+            ExitFullScreenMode();
+        }
+        else
+        {
+            // Enter full screen mode for the specified camera
+            EnterFullScreenMode(cameraIndex);
+        }
+    }
+    
+    public void EnterFullScreenMode(int cameraIndex)
+    {
+        if (cameraIndex < 0 || cameraIndex >= cameraCells.Count)
+        {
+            Debug.LogWarning($"Cannot enter full screen: Camera index {cameraIndex} out of range (0-{cameraCells.Count - 1})");
+            return;
+        }
+        
+        if (isFullScreenMode)
+        {
+            // If already in full screen, exit first
+            ExitFullScreenMode();
+        }
+        
+        Debug.Log($"[FULLSCREEN] Entering full screen mode for camera {cameraIndex + 1}");
+        
+        // Store original positions and sizes
+        originalPositions = new Vector3[cameraCells.Count];
+        originalSizes = new Vector2[cameraCells.Count];
+        
+        for (int i = 0; i < cameraCells.Count; i++)
+        {
+            if (cameraCells[i].displayGameObject != null)
+            {
+                originalPositions[i] = cameraCells[i].displayGameObject.transform.position;
+                
+                // Get original size from mesh bounds
+                var meshFilter = cameraCells[i].displayGameObject.GetComponent<MeshFilter>();
+                if (meshFilter != null && meshFilter.mesh != null)
+                {
+                    var bounds = meshFilter.mesh.bounds;
+                    originalSizes[i] = new Vector2(bounds.size.x, bounds.size.y);
+                }
+                else
+                {
+                    originalSizes[i] = Vector2.one; // Fallback size
+                }
+            }
+        }
+        
+        // Hide all cameras except the selected one
+        for (int i = 0; i < cameraCells.Count; i++)
+        {
+            if (i != cameraIndex && cameraCells[i].displayGameObject != null)
+            {
+                cameraCells[i].displayGameObject.SetActive(false);
+                if (cameraCells[i].borderGameObject != null)
+                {
+                    cameraCells[i].borderGameObject.SetActive(false);
+                }
+            }
+        }
+        
+        // Scale and center the selected camera
+        var selectedCell = cameraCells[cameraIndex];
+        if (selectedCell.displayGameObject != null)
+        {
+            // Calculate full screen size (available for all components)
+            Vector2 fullScreenSize = displayBounds * 0.95f; // Slight margin
+            
+            // Position at center
+            selectedCell.displayGameObject.transform.position = Vector3.zero;
+            
+            // Scale to fill the display bounds (maintaining aspect ratio)
+            var meshFilter = selectedCell.displayGameObject.GetComponent<MeshFilter>();
+            if (meshFilter != null)
+            {
+                // Create new mesh with full screen size
+                meshFilter.mesh = CreateQuadMesh(fullScreenSize);
+            }
+            
+            // Update border if visible
+            if (selectedCell.borderGameObject != null && selectedCell.isSelected)
+            {
+                selectedCell.borderGameObject.transform.position = Vector3.zero;
+                var borderMeshFilter = selectedCell.borderGameObject.GetComponent<MeshFilter>();
+                if (borderMeshFilter != null)
+                {
+                    var cam = Camera.main;
+                    float pixelsToUnits = cam != null && cam.orthographic ? cam.orthographicSize * 2f / Screen.height : 0.01f;
+                    float borderThickness = 3f * pixelsToUnits;
+                    borderMeshFilter.mesh = CreateBorderMesh(fullScreenSize, borderThickness);
+                }
+            }
+            
+            // Update IP label position
+            if (selectedCell.ipLabel != null)
+            {
+                var labelTransform = selectedCell.ipLabel.transform;
+                labelTransform.localPosition = new Vector3(0, -fullScreenSize.y/2 - 0.5f, -0.1f);
+            }
+        }
+        
+        isFullScreenMode = true;
+        fullScreenCameraIndex = cameraIndex;
+        
+        Debug.Log($"[FULLSCREEN] Camera {cameraIndex + 1} now in full screen mode");
+    }
+    
+    public void ExitFullScreenMode()
+    {
+        if (!isFullScreenMode)
+        {
+            return;
+        }
+        
+        Debug.Log($"[FULLSCREEN] Exiting full screen mode");
+        
+        // Show all cameras again
+        for (int i = 0; i < cameraCells.Count; i++)
+        {
+            if (cameraCells[i].displayGameObject != null)
+            {
+                cameraCells[i].displayGameObject.SetActive(true);
+            }
+        }
+        
+        // Restore original positions and sizes
+        for (int i = 0; i < cameraCells.Count; i++)
+        {
+            var cell = cameraCells[i];
+            if (cell.displayGameObject != null && originalPositions != null && originalSizes != null)
+            {
+                // Restore position
+                cell.displayGameObject.transform.position = originalPositions[i];
+                
+                // Restore mesh size
+                var meshFilter = cell.displayGameObject.GetComponent<MeshFilter>();
+                if (meshFilter != null)
+                {
+                    meshFilter.mesh = CreateQuadMesh(originalSizes[i]);
+                }
+                
+                // Restore border
+                if (cell.borderGameObject != null)
+                {
+                    cell.borderGameObject.transform.position = originalPositions[i];
+                    var borderMeshFilter = cell.borderGameObject.GetComponent<MeshFilter>();
+                    if (borderMeshFilter != null)
+                    {
+                        var cam = Camera.main;
+                        float pixelsToUnits = cam != null && cam.orthographic ? cam.orthographicSize * 2f / Screen.height : 0.01f;
+                        float borderThickness = 3f * pixelsToUnits;
+                        borderMeshFilter.mesh = CreateBorderMesh(originalSizes[i], borderThickness);
+                    }
+                    
+                    // Restore border visibility based on selection state
+                    cell.borderGameObject.SetActive(cell.isSelected);
+                }
+                
+                // Restore IP label position
+                if (cell.ipLabel != null)
+                {
+                    var labelTransform = cell.ipLabel.transform;
+                    labelTransform.localPosition = new Vector3(0, -originalSizes[i].y/2 - 0.3f, -0.1f);
+                }
+            }
+        }
+        
+        isFullScreenMode = false;
+        fullScreenCameraIndex = -1;
+        originalPositions = null;
+        originalSizes = null;
+        
+        Debug.Log("[FULLSCREEN] Returned to grid view");
+    }
+    
+    public bool IsFullScreenMode()
+    {
+        return isFullScreenMode;
+    }
+    
+    public int GetFullScreenCameraIndex()
+    {
+        return fullScreenCameraIndex;
     }
     
     private void OnDestroy()

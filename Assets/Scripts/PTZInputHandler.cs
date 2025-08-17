@@ -7,6 +7,9 @@ public class PTZInputHandler : MonoBehaviour
     [Header("VISCA Control")]
     [SerializeField] private VISCAController viscaController;
     
+    [Header("Camera Display")]
+    [SerializeField] private NDICameraGridManager cameraGridManager;
+    
     [Header("Input Settings")]
     [SerializeField] private InputActionAsset ptzInputActions;
     [SerializeField] private bool enableKeyboardControls = true;
@@ -51,6 +54,11 @@ public class PTZInputHandler : MonoBehaviour
         if (viscaController == null)
         {
             viscaController = FindObjectOfType<VISCAController>();
+        }
+        
+        if (cameraGridManager == null)
+        {
+            cameraGridManager = FindObjectOfType<NDICameraGridManager>();
         }
         
         InitializeInputActions();
@@ -246,7 +254,7 @@ public class PTZInputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.H))
             HandleHomeCommand();
         if (Input.GetKeyDown(KeyCode.Space))
-            HandleStopAllCommand();
+            HandleFullScreenToggle();
         if (Input.GetKeyDown(KeyCode.Tab))
             HandleAutoFocusCommand();
     }
@@ -422,6 +430,28 @@ public class PTZInputHandler : MonoBehaviour
         
         Debug.Log("[PTZ Input] Auto focus command");
         await viscaController.OnePushAutoFocus();
+    }
+    
+    private void HandleFullScreenToggle()
+    {
+        if (cameraGridManager == null)
+        {
+            Debug.LogWarning("[PTZ Input] Camera Grid Manager not found - cannot toggle full screen");
+            return;
+        }
+        
+        // Get currently selected camera from input manager
+        var cameraInputManager = FindObjectOfType<CameraInputManager>();
+        if (cameraInputManager == null || !cameraInputManager.IsCameraSelected())
+        {
+            Debug.LogWarning("[PTZ Input] No camera selected - cannot toggle full screen");
+            return;
+        }
+        
+        int selectedCameraIndex = cameraInputManager.GetCurrentlySelectedCamera();
+        Debug.Log($"[PTZ Input] Toggling full screen for camera {selectedCameraIndex + 1}");
+        
+        cameraGridManager.ToggleFullScreen(selectedCameraIndex);
     }
     
     private async void HandlePresetCommand(int presetNumber)
